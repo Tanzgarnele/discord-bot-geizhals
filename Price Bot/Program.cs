@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using System.Reflection;
 
-namespace Price_Bot
+namespace ManfredHorst
 {
     public class Program
     {

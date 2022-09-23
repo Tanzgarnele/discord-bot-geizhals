@@ -2,7 +2,7 @@
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 
-namespace Price_Bot
+namespace ManfredHorst
 {
     public class PrefixHandler
     {

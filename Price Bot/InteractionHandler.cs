@@ -3,7 +3,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using System.Reflection;
 
-namespace Price_Bot
+namespace ManfredHorst
 {
     public class InteractionHandler
     {
