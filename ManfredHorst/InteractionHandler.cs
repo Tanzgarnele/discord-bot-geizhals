@@ -34,8 +34,12 @@ namespace ManfredHorst
             }
             catch (Exception ex)
             {
-
                 Console.WriteLine(ex.ToString());
+
+                if (arg.Type == InteractionType.ApplicationCommand)
+                {
+                    await arg.GetOriginalResponseAsync().ContinueWith(async (msg) => await msg.Result.DeleteAsync());
+                }
             }
         }
     }
