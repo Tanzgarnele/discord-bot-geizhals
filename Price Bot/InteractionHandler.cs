@@ -29,7 +29,7 @@ namespace Price_Bot
         {
             try
             {
-                var context = new SocketInteractionContext(this.client, arg)
+                var context = new SocketInteractionContext(this.client, arg);
                     await this.commands.ExecuteCommandAsync(context, this.services);
             }
             catch (Exception ex)
