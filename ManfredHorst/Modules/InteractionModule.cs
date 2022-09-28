@@ -10,12 +10,6 @@ namespace ManfredHorst.Modules
         [SlashCommand("pricealarm", "Add an Url from Geizhals.de to get pinged when its below your desired amount.")]
         public async Task PriceAlarm()
         {
-            await RespondAsync("LAK ICH KANN NOCH NICHTS11!1!!!!!!!!!!!!!!");
-        }
-
-        [SlashCommand("geizhals", "Teste Button für Geizhals.")]
-        public async Task Geizhals()
-        {
             ButtonBuilder button = new ButtonBuilder()
             {
                 Label = "Add Alarm",
@@ -36,7 +30,7 @@ namespace ManfredHorst.Modules
             component.WithButton(button);
             //component.WithSelectMenu(menu);
 
-            await RespondAsync("Current alarms:", components: component.Build(), ephemeral: true);
+            await RespondAsync("Your current alarms:", components: component.Build(), ephemeral: true);
         }
 
         //[ComponentInteraction("menu")]
@@ -48,27 +42,44 @@ namespace ManfredHorst.Modules
         [ComponentInteraction("addalarm")]
         public async Task HandleAddAlarmInput()
         {
-            await RespondWithModalAsync<GeizhalsAddUrlModal>("add_alarm");
+            await RespondWithModalAsync<AddAlarmModal>("add_alarm");
         }
 
         [ModalInteraction("add_alarm")]
-        public async Task ModalResponse(GeizhalsAddUrlModal modal)
+        public async Task ModalResponse(AddAlarmModal modal)
         {
-            AllowedMentions mentions = new();
-            mentions.AllowedTypes = AllowedMentionTypes.Users;
+            AllowedMentions mentions = new AllowedMentions
+            {
+                AllowedTypes = AllowedMentionTypes.Users
+            };
+
+            if (String.IsNullOrWhiteSpace(modal.Alias))
+            {
+                await RespondAsync($"{Context.User.Mention}Missing Name", allowedMentions: mentions, ephemeral: true);
+            }
 
             if (String.IsNullOrWhiteSpace(modal.Url))
             {
-                await RespondAsync("Missing url", allowedMentions: mentions, ephemeral: true);
-            }
-            
-            if (String.IsNullOrWhiteSpace(modal.Alias))
-            {
-                await RespondAsync("Missing Name", allowedMentions: mentions, ephemeral: true);
+                await RespondAsync($"{Context.User.Mention}Missing url", allowedMentions: mentions, ephemeral: true);
             }
 
-            SavedAlarms savedAlarms = new SavedAlarms();
-            savedAlarms.UserId = Context.User.Username;
+            if (!Uri.TryCreate(uriString: modal.Url, uriKind: UriKind.Absolute, result: out Uri uriResult)
+            || uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps)
+            {
+                await RespondAsync($"{Context.User.Mention}Not an Url", allowedMentions: mentions, ephemeral: true);
+            }
+
+            if (!modal.Url.Contains("geizhals.de"))
+            {
+                await RespondAsync($"{Context.User.Mention}Nur Geizhals.de!!!!!!!!!!!!", allowedMentions: mentions, ephemeral: true);
+            }
+
+            SavedAlarms savedAlarms = new SavedAlarms
+            {
+                UserId = Context.User.Username,
+                Price = modal.Price
+            };
+
             savedAlarms.UrlList.Add(new Urls
             {
                 Url = modal.Url,
