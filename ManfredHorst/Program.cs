@@ -1,12 +1,11 @@
-﻿using Discord.Interactions;
+﻿using Discord;
+using Discord.Commands;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Configuration.Yaml;
-using Discord.Commands;
-using Discord;
-using System.Diagnostics;
 
 namespace ManfredHorst
 {
@@ -49,7 +48,6 @@ namespace ManfredHorst
             await provider.GetRequiredService<InteractionHandler>().InitalizeAsync();
 
             IConfigurationRoot config = provider.GetRequiredService<IConfigurationRoot>();
-            
 
             client.Log += async (LogMessage msg) => { Console.WriteLine(msg.Message); };
             commands.Log += async (LogMessage msg) => { Console.WriteLine(msg.Message); };
@@ -65,15 +63,13 @@ namespace ManfredHorst
             await Task.Delay(-1);
         }
 
-        static bool IsDebug()
+        private static bool IsDebug()
         {
-            #if DEBUG
-                return true;
-            #else
+#if DEBUG
+            return true;
+#else
                 return false;
-            #endif
+#endif
         }
-
-
     }
 }

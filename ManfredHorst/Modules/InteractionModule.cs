@@ -30,7 +30,7 @@ namespace ManfredHorst.Modules
             component.WithButton(button);
             //component.WithSelectMenu(menu);
 
-            await RespondAsync("Your current alarms:", components: component.Build(), ephemeral: true);
+            await RespondAsync(components: component.Build());
         }
 
         //[ComponentInteraction("menu")]
@@ -60,18 +60,18 @@ namespace ManfredHorst.Modules
 
             if (String.IsNullOrWhiteSpace(modal.Url))
             {
-                await RespondAsync($"{Context.User.Mention}Missing url", allowedMentions: mentions, ephemeral: true);
+                await RespondAsync($"{Context.User.Mention} Missing url", allowedMentions: mentions, ephemeral: true);
             }
 
             if (!Uri.TryCreate(uriString: modal.Url, uriKind: UriKind.Absolute, result: out Uri uriResult)
             || uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps)
             {
-                await RespondAsync($"{Context.User.Mention}Not an Url", allowedMentions: mentions, ephemeral: true);
+                await RespondAsync($"{Context.User.Mention} Not an Url", allowedMentions: mentions, ephemeral: true);
             }
 
             if (!modal.Url.Contains("geizhals.de"))
             {
-                await RespondAsync($"{Context.User.Mention}Nur Geizhals.de!!!!!!!!!!!!", allowedMentions: mentions, ephemeral: true);
+                await RespondAsync($"{Context.User.Mention} Nur Geizhals.de!!!!!!!!!!!!", allowedMentions: mentions, ephemeral: true);
             }
 
             SavedAlarms savedAlarms = new SavedAlarms
