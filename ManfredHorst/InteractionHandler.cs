@@ -29,7 +29,7 @@ namespace ManfredHorst
         {
             try
             {
-                var context = new SocketInteractionContext(this.client, arg);
+                SocketInteractionContext context = new SocketInteractionContext(this.client, arg);
                     await this.commands.ExecuteCommandAsync(context, this.services);
             }
             catch (Exception ex)
