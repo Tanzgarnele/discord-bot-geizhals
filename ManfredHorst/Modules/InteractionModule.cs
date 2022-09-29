@@ -82,17 +82,6 @@ namespace ManfredHorst.Modules
                 await RespondAsync($"{Context.User.Mention} Nur Geizhals.de!!!!!!!!!!!!", allowedMentions: mentions, ephemeral: true);
             }
 
-            //SavedAlarms savedAlarms = new SavedAlarms
-            //{
-            //    UserId = Context.User.Username,
-            //    Price = modal.Price
-            //};
-
-            //savedAlarms.UrlList.Add(new Urls
-            //{
-            //    Url = modal.Url,
-            //    Alias = modal.Alias
-            //});
             User user = new User
             {
                 Mention = Context.User.Mention,
@@ -100,11 +89,13 @@ namespace ManfredHorst.Modules
                 LastSeen = DateTime.Now
             };
 
-            Alarm alarm = new Alarm();
-            alarm.Url = modal.Url;
-            alarm.Alias = modal.Url;
-            alarm.Price = modal.Price;
-            alarm.UserId = await this.productData.GetUserByMention(user.Mention);
+            Alarm alarm = new Alarm
+            {
+                Url = modal.Url,
+                Alias = modal.Url,
+                Price = modal.Price,
+                UserId = await this.productData.GetUserByMention(user.Mention)
+            };
 
             await this.productData.InsertUser(user);
             await this.productData.InsertAlarm(alarm);

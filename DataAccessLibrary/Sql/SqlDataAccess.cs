@@ -15,15 +15,12 @@ namespace DataAccessLibrary.Sql
 
             try
             {
-
-            using (IDbConnection connection = new NpgsqlConnection(connectionString))
-            {
+                using IDbConnection connection = new NpgsqlConnection(connectionString);
                 return await connection.ExecuteScalarAsync<Int64>(sql);
-            }
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
         }
 
@@ -33,15 +30,12 @@ namespace DataAccessLibrary.Sql
 
             try
             {
-            using (IDbConnection connection = new NpgsqlConnection(connectionString))
-            {
+                using IDbConnection connection = new NpgsqlConnection(connectionString);
                 await connection.ExecuteAsync(sql, parameters);
-            }
-
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
         }
     }
