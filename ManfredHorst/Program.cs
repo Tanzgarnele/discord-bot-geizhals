@@ -1,4 +1,6 @@
-﻿using Discord;
+﻿using DataAccessLibrary.Interfaces;
+using DataAccessLibrary.Sql;
+using Discord;
 using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -32,6 +34,8 @@ namespace ManfredHorst
                 .AddSingleton(x => new CommandService())
                 .AddSingleton<InteractionHandler>()
                 .AddSingleton<PrefixHandler>()
+                .AddSingleton<ISqlDataAccess, SqlDataAccess>()
+                .AddSingleton<IProductData, ProductData>()
                 ).Build();
 
             await RunAsync(host);

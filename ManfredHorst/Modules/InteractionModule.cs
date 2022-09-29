@@ -1,12 +1,20 @@
-﻿using Discord;
+﻿using DataAccessLibrary.Interfaces;
+using DataAccessLibrary.Models;
+using Discord;
 using Discord.Interactions;
 using ManfredHorst.Modules.Modal;
-using ManfredHorst.UserData;
 
 namespace ManfredHorst.Modules
 {
     public class InteractionModule : InteractionModuleBase<SocketInteractionContext>
     {
+        private IProductData? productData;
+
+        public InteractionModule(IProductData productData)
+        {
+            this.productData = productData;
+        }
+
         [SlashCommand("pricealarm", "Add an Url from Geizhals.de to get pinged when its below your desired amount.")]
         public async Task PriceAlarm()
         {
@@ -74,17 +82,32 @@ namespace ManfredHorst.Modules
                 await RespondAsync($"{Context.User.Mention} Nur Geizhals.de!!!!!!!!!!!!", allowedMentions: mentions, ephemeral: true);
             }
 
-            SavedAlarms savedAlarms = new SavedAlarms
+            //SavedAlarms savedAlarms = new SavedAlarms
+            //{
+            //    UserId = Context.User.Username,
+            //    Price = modal.Price
+            //};
+
+            //savedAlarms.UrlList.Add(new Urls
+            //{
+            //    Url = modal.Url,
+            //    Alias = modal.Alias
+            //});
+            User user = new User
             {
-                UserId = Context.User.Username,
-                Price = modal.Price
+                Mention = Context.User.Mention,
+                Username = Context.User.Username,
+                LastSeen = DateTime.Now
             };
 
-            savedAlarms.UrlList.Add(new Urls
-            {
-                Url = modal.Url,
-                Alias = modal.Alias
-            });
+            Alarm alarm = new Alarm();
+            alarm.Url = modal.Url;
+            alarm.Alias = modal.Url;
+            alarm.Price = modal.Price;
+            alarm.UserId = await this.productData.GetUserByMention(user.Mention);
+
+            await this.productData.InsertUser(user);
+            await this.productData.InsertAlarm(alarm);
 
             await RespondAsync($"{Context.User.Mention} Url = {modal.Url} Alias = {modal.Alias}", allowedMentions: mentions, ephemeral: true);
         }
