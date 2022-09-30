@@ -3,6 +3,7 @@ using DataAccessLibrary.Models;
 using Discord;
 using Discord.Interactions;
 using ManfredHorst.Modules.Modal;
+using System.Collections.Generic;
 
 namespace ManfredHorst.Modules
 {
@@ -38,7 +39,8 @@ namespace ManfredHorst.Modules
             component.WithButton(button);
             //component.WithSelectMenu(menu);
 
-            await RespondAsync(components: component.Build());
+            await BuildAlarmEmbed(await this.productData.GetAlarmsByMention(Context.User.Mention), component);
+            //await RespondAsync(components: component.Build());
         }
 
         //[ComponentInteraction("menu")]
@@ -92,7 +94,7 @@ namespace ManfredHorst.Modules
             Alarm alarm = new Alarm
             {
                 Url = modal.Url,
-                Alias = modal.Url,
+                Alias = modal.Alias,
                 Price = modal.Price,
                 UserId = await this.productData.GetUserByMention(user.Mention)
             };
@@ -101,6 +103,32 @@ namespace ManfredHorst.Modules
             await this.productData.InsertAlarm(alarm);
 
             await RespondAsync($"{Context.User.Mention} Url = {modal.Url} Alias = {modal.Alias}", allowedMentions: mentions, ephemeral: true);
+        }
+
+        public async Task BuildAlarmEmbed(List<Alarm> alarms, ComponentBuilder component)
+        {
+                EmbedBuilder embed = new EmbedBuilder();
+            if (alarms.Any() && alarms != null)
+            {
+                Int64 index = 0;
+                foreach (Alarm alarm in alarms)
+                {
+                    //embed.AddField($"{++index}. {alarm.Alias} {alarm.Price}€ [Geizhals.de]({alarm.Url})", "\t", inline: true)
+                    embed.AddField("Nr.", $"{++index}", true)
+                        .AddField("Name", $"[{alarm.Alias}]({alarm.Url})", true)
+                        .AddField("Price", $"{alarm.Price}€", true)
+                        .WithAuthor(Context.Client.CurrentUser)
+                        .WithColor(Color.Orange)
+                        .WithTitle($"Your current Alarms: {index}")
+                        .WithCurrentTimestamp();
+                }
+                await RespondAsync(embed: embed.Build(), components: component.Build());
+            }
+            else
+            {
+                embed.Title = "You currently have 0 alarms";
+                await RespondAsync(embed: embed.Build(), components: component.Build());
+            }
         }
     }
 }

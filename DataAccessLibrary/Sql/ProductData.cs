@@ -23,7 +23,15 @@ namespace DataAccessLibrary.Sql
         {
             String sql = $"SELECT id FROM users WHERE mention = '{mention}'";
 
-            return this.Db.LoadData(sql);
+            return this.Db.LoadScalarData(sql);
+        }
+
+        public Task<List<Alarm>> GetAlarmsByMention(String mention)
+        {
+            String sql = $@"Select url, alias, price From urls WHERE userid 
+                            IN (SELECT id FROM users WHERE mention = '{mention}')";
+
+            return this.Db.LoadData<Alarm, dynamic>(sql, new { });
         }
 
         public Task InsertUser(User user)

@@ -9,7 +9,7 @@ namespace DataAccessLibrary.Sql
     {
         public String ConnectionStringName { get; set; } = "User ID=SA;Password=TEST123;Host=192.168.178.77;Port=49153;Database=GeizhalsDiscord;";
 
-        public async Task<Int64> LoadData(String sql)
+        public async Task<Int64> LoadScalarData(String sql)
         {
             String connectionString = this.ConnectionStringName;
 
@@ -21,6 +21,18 @@ namespace DataAccessLibrary.Sql
             catch (Exception ex)
             {
                 throw;
+            }
+        }
+
+        public async Task<List<T>> LoadData<T, U>(String sql, U parameters)
+        {
+            String connectionString = this.ConnectionStringName;
+
+            using (IDbConnection connection = new NpgsqlConnection(connectionString))
+            {
+                IEnumerable<T> data = await connection.QueryAsync<T>(sql, parameters);
+
+                return data.ToList();
             }
         }
 
