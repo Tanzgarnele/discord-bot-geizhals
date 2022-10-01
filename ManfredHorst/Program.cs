@@ -58,22 +58,20 @@ namespace ManfredHorst
             client.Ready += async () =>
             {
                 Console.WriteLine("DER DEUTSCHE BÄR IST ONLINE!");
-                await commands.RegisterCommandsGloballyAsync(true);
+                try
+                {
+                    await commands.RegisterCommandsGloballyAsync(true);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             };
 
             await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DiscordToken", EnvironmentVariableTarget.User));
             await client.StartAsync();
 
             await Task.Delay(-1);
-        }
-
-        private static bool IsDebug()
-        {
-#if DEBUG
-            return true;
-#else
-                return false;
-#endif
         }
     }
 }

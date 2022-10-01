@@ -2,7 +2,9 @@
 using DataAccessLibrary.Models;
 using Discord;
 using Discord.Interactions;
+using Discord.WebSocket;
 using ManfredHorst.Modules.Modal;
+using Microsoft.VisualBasic;
 using System.Text;
 
 namespace ManfredHorst.Modules
@@ -10,52 +12,49 @@ namespace ManfredHorst.Modules
     public class InteractionModule : InteractionModuleBase<SocketInteractionContext>
     {
         private IProductData? productData;
+        private ComponentBuilder component = new ComponentBuilder();
+        private List<Alarm> alarms;
 
         public InteractionModule(IProductData productData)
         {
             this.productData = productData;
         }
 
-        [SlashCommand("pricealarm", "Add an Url from Geizhals.de to get pinged when its below your desired amount.")]
-        public async Task PriceAlarm()
+        [SlashCommand("show-alarms", "Shows your current alarms")]
+        public async Task ShowAlarms()
         {
-            ButtonBuilder button = new ButtonBuilder()
-            {
-                Label = "Add Alarm",
-                CustomId = "addalarm",
-                Style = ButtonStyle.Primary,
-            };
-
-            //var menu = new SelectMenuBuilder()
-            //{
-            //    CustomId = "menu",
-            //    Placeholder = "Show options"
-            //};
-
-            //menu.AddOption("Add Alarm", "addalarm");
-            //menu.AddOption("Delete Alarm", "deletealarm");
-
-            ComponentBuilder component = new ComponentBuilder();
-            component.WithButton(button);
-            //component.WithSelectMenu(menu);
-
-            await BuildAlarmEmbed(await this.productData.GetAlarmsByMention(Context.User.Mention), component);
-            //await RespondAsync(components: component.Build());
+            alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
+            await RespondAsync(embed: this.BuildEmbed().Build());
         }
 
-        //[ComponentInteraction("menu")]
-        //public async Task HandleMenuSelection(String[] inputs)
-        //{
-        //    await RespondAsync(inputs.FirstOrDefault());
-        //}
+        [SlashCommand("pricealarm", "Shows Current Alarms and lets you Add or Delete an Url from Geizhals.de")]
+        public async Task PriceAlarm()
+        {
+            alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
+            await BuildAlarmEmbed(await this.productData.GetAlarmsByMention(Context.User.Mention));
+        }
 
         [ComponentInteraction("addalarm")]
         public async Task HandleAddAlarmInput()
         {
-            await RespondWithModalAsync<AddAlarmModal>("add_alarm");
+            await RespondWithModalAsync<AddAlarmModal>("add_alarm_modal");
         }
 
-        [ModalInteraction("add_alarm")]
+        [ComponentInteraction("adddbgalarm")]
+        public async Task HandleAddDbgAlarmInput()
+        {
+            await this.productData.InsertDEBUGAlarm();
+            alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
+
+            var context = Context.Interaction as SocketMessageComponent;
+            await context.UpdateAsync(x =>
+            {
+                x.Content = $"Added new entry in database!";
+                x.Embed = this.BuildEmbed().Build();
+            });
+        }
+
+        [ModalInteraction("add_alarm_modal")]
         public async Task ModalResponse(AddAlarmModal modal)
         {
             AllowedMentions mentions = new AllowedMentions
@@ -102,15 +101,71 @@ namespace ManfredHorst.Modules
             await this.productData.InsertUser(user);
             await this.productData.InsertAlarm(alarm);
 
-            await RespondAsync($"{Context.User.Mention} Url = {modal.Url} Alias = {modal.Alias}", allowedMentions: mentions, ephemeral: true);
+            await RespondAsync($"added!", allowedMentions: mentions, ephemeral: true);
         }
 
-        public async Task BuildAlarmEmbed(List<Alarm> alarms, ComponentBuilder component)
+        [ComponentInteraction("deletealarm")]
+        public async Task HandleDeleteAlarmInput()
+        {
+            await RespondWithModalAsync<DeleteAlarmModal>("delete_alarm_modal");
+        }
+
+        [ModalInteraction("delete_alarm_modal")]
+        public async Task ModalResponse(DeleteAlarmModal modal)
+        {
+            try
+            {
+                await this.productData.DeleteAlarm(modal.Alias, Context.User.Mention);
+                await RespondAsync($"{Context.User.Mention} Alarm deleted!", ephemeral: true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                await RespondAsync($"{Context.User.Mention} Error: could not find the name!");
+            }
+        }
+
+        public async Task BuildAlarmEmbed(List<Alarm> alarms)
+        {
+            ButtonBuilder addAlarmButton = new ButtonBuilder()
+            {
+                Label = "Add",
+                CustomId = "addalarm",
+                Style = ButtonStyle.Primary,
+            };
+
+            ButtonBuilder addDebugAddButton = new ButtonBuilder()
+            {
+                Label = "Add Dbg",
+                CustomId = "adddbgalarm",
+                Style = ButtonStyle.Secondary,
+            };
+
+            component.WithButton(addDebugAddButton);
+            component.WithButton(addAlarmButton);
+
+            if (alarms.Any() && alarms != null)
+            {
+                ButtonBuilder deleteAlarmButton = new ButtonBuilder()
+                {
+                    Label = "Delete",
+                    CustomId = "deletealarm",
+                    Style = ButtonStyle.Danger,
+                };
+
+                component.WithButton(deleteAlarmButton);
+            }
+
+            await RespondAsync(embed: this.BuildEmbed().Build(), components: component.Build(), ephemeral: true);
+        }
+
+        public EmbedBuilder BuildEmbed()
         {
             EmbedBuilder embed = new EmbedBuilder();
             StringBuilder stringbuilderAliasUrl = new StringBuilder();
             StringBuilder stringbuilderPrice = new StringBuilder();
             StringBuilder stringbuilderIndex = new StringBuilder();
+
             if (alarms.Any() && alarms != null)
             {
                 Int64 index = 0;
@@ -118,22 +173,22 @@ namespace ManfredHorst.Modules
                 {
                     stringbuilderAliasUrl.Append($"[{alarm.Alias}]({alarm.Url})\n");
                     stringbuilderPrice.Append($"{alarm.Price}€\n");
-                    stringbuilderIndex.Append($"`{++index}`\n");
+                    stringbuilderIndex.Append($"{++index}\n");
                 }
-                embed.AddField("Nr.", $"{stringbuilderIndex.ToString()}", true)
-                    .AddField("Name", $"{stringbuilderAliasUrl.ToString()}", true)
-                    .AddField("Price", $"{stringbuilderPrice.ToString()}", true)
+
+                embed.AddField("Nr.", $"{stringbuilderIndex}", true)
+                    .AddField("Name", $"{stringbuilderAliasUrl}", true)
+                    .AddField("Price", $"{stringbuilderPrice}", true)
                     .WithAuthor(Context.Client.CurrentUser)
                     .WithColor(Color.Orange)
                     .WithTitle($"Alarms: {index}")
-                    .WithCurrentTimestamp();
-                await RespondAsync(embed: embed.Build(), components: component.Build());
+                .WithCurrentTimestamp();
             }
             else
             {
                 embed.Title = "Alarms: 0";
-                await RespondAsync(embed: embed.Build(), components: component.Build());
             }
+            return embed;
         }
     }
 }

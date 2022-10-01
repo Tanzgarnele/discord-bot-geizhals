@@ -8,8 +8,12 @@ namespace DataAccessLibrary.Interfaces
 
         Task InsertUser(User user);
 
+        Task InsertDEBUGAlarm();
+
         Task<Int64> GetUserByMention(String mention);
 
         Task<List<Alarm>> GetAlarmsByMention(String mention);
+
+        Task DeleteAlarm(String alias, String mention);
     }
 }

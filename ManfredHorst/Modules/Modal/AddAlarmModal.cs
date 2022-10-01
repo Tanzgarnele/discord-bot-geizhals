@@ -5,7 +5,7 @@ namespace ManfredHorst.Modules.Modal
 {
     public class AddAlarmModal : IModal
     {
-        public String Title => "Geizhals Add Alarm Modal";
+        public String Title => "Add Alarm";
 
         [InputLabel("Geizhals Url")]
         [ModalTextInput("alarm_url", TextInputStyle.Short, placeholder: "Add the Url for the Geizhals items you want to track.", maxLength: 255)]

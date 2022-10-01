@@ -50,5 +50,20 @@ namespace DataAccessLibrary.Sql
                 throw;
             }
         }
+
+        public async Task ExecuteSql(String sql)
+        {
+            String connectionString = this.ConnectionStringName;
+
+            try
+            {
+                using IDbConnection connection = new NpgsqlConnection(connectionString);
+                await connection.ExecuteAsync(sql);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }

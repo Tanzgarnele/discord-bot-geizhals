@@ -8,5 +8,7 @@
         Task<Int64> LoadScalarData(String sql);
 
         Task<List<T>> LoadData<T, U>(String sql, U parameters);
+
+        Task ExecuteSql(String sql);
     }
 }
