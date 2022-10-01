@@ -3,7 +3,7 @@ using DataAccessLibrary.Models;
 using Discord;
 using Discord.Interactions;
 using ManfredHorst.Modules.Modal;
-using System.Collections.Generic;
+using System.Text;
 
 namespace ManfredHorst.Modules
 {
@@ -107,26 +107,31 @@ namespace ManfredHorst.Modules
 
         public async Task BuildAlarmEmbed(List<Alarm> alarms, ComponentBuilder component)
         {
-                EmbedBuilder embed = new EmbedBuilder();
+            EmbedBuilder embed = new EmbedBuilder();
+            StringBuilder stringbuilderAliasUrl = new StringBuilder();
+            StringBuilder stringbuilderPrice = new StringBuilder();
+            StringBuilder stringbuilderIndex = new StringBuilder();
             if (alarms.Any() && alarms != null)
             {
                 Int64 index = 0;
                 foreach (Alarm alarm in alarms)
                 {
-                    //embed.AddField($"{++index}. {alarm.Alias} {alarm.Price}€ [Geizhals.de]({alarm.Url})", "\t", inline: true)
-                    embed.AddField("Nr.", $"{++index}", true)
-                        .AddField("Name", $"[{alarm.Alias}]({alarm.Url})", true)
-                        .AddField("Price", $"{alarm.Price}€", true)
-                        .WithAuthor(Context.Client.CurrentUser)
-                        .WithColor(Color.Orange)
-                        .WithTitle($"Your current Alarms: {index}")
-                        .WithCurrentTimestamp();
+                    stringbuilderAliasUrl.Append($"[{alarm.Alias}]({alarm.Url})\n");
+                    stringbuilderPrice.Append($"{alarm.Price}€\n");
+                    stringbuilderIndex.Append($"`{++index}`\n");
                 }
+                embed.AddField("Nr.", $"{stringbuilderIndex.ToString()}", true)
+                    .AddField("Name", $"{stringbuilderAliasUrl.ToString()}", true)
+                    .AddField("Price", $"{stringbuilderPrice.ToString()}", true)
+                    .WithAuthor(Context.Client.CurrentUser)
+                    .WithColor(Color.Orange)
+                    .WithTitle($"Alarms: {index}")
+                    .WithCurrentTimestamp();
                 await RespondAsync(embed: embed.Build(), components: component.Build());
             }
             else
             {
-                embed.Title = "You currently have 0 alarms";
+                embed.Title = "Alarms: 0";
                 await RespondAsync(embed: embed.Build(), components: component.Build());
             }
         }
