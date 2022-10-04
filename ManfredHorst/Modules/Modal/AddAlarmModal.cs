@@ -12,7 +12,7 @@ namespace ManfredHorst.Modules.Modal
         public String Url { get; set; }
 
         [InputLabel("Name for the Alarm")]
-        [ModalTextInput("alarm_name", TextInputStyle.Short, placeholder: "Cpu, Ram...", maxLength: 25)]
+        [ModalTextInput("alarm_name", TextInputStyle.Short, placeholder: "Cpu, Ram...", maxLength: 100)]
         public String Alias { get; set; }
 
         [InputLabel("Price")]

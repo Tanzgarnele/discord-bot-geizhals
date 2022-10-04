@@ -65,6 +65,7 @@ namespace ManfredHorst
 
             if (Convert.ToDouble(product.Price) <= Convert.ToDouble(alarm.Price) && Convert.ToDouble(alarm.Price) != 0 && Convert.ToDouble(product.Price) != 0)
             {
+                //IMessageChannel? chan = client.GetChannel(785318419750191114) as IMessageChannel;
                 IMessageChannel? chan = client.GetChannel(570446080697827334) as IMessageChannel;
 
                 if (chan != null)
@@ -81,7 +82,7 @@ namespace ManfredHorst
             GeizhalsProduct product = new()
             {
                 Name = document.All.Where(x => x.ClassName == "variant__header__headline").FirstOrDefault().TextContent.Trim(),
-                Price = document.All.Where(x => x.ClassName == "gh_price").FirstOrDefault().TextContent.Replace("ab ", String.Empty).Replace("€ ", String.Empty).Trim()
+                Price = document.QuerySelectorAll("div.offer__price .gh_price").FirstOrDefault().TextContent.Replace("ab ", String.Empty).Replace("€ ", String.Empty).Trim()
             };
 
             return product;
