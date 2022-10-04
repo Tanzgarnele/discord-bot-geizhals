@@ -47,9 +47,10 @@ namespace DataAccessLibrary.Sql
 
             return this.Db.SaveData(sql, alarm);
         }
+
         public Task InsertDEBUGAlarm()
         {
-            String sql = $@"INSERT INTO Urls (url, alias, price, userid) VALUES ('https://geizhals.de/', 'DebugName{rnd.Next()}', {rnd.Next(1,999)}, 2) ON CONFLICT DO NOTHING;";
+            String sql = $@"INSERT INTO Urls (url, alias, price, userid) VALUES ('https://geizhals.de/', 'DebugName{rnd.Next()}', {rnd.Next(1, 999)}, 2) ON CONFLICT DO NOTHING;";
 
             return this.Db.ExecuteSql(sql);
         }

@@ -26,7 +26,7 @@ namespace ManfredHorst
                 this.productData = new ProductData(new SqlDataAccess());
                 userAlarms = await productData.GetAlarms();
 
-                foreach (var alarm in userAlarms)
+                foreach (UserAlarm alarm in userAlarms)
                 {
                     await GetHtmlAsync(alarm);
                 }
@@ -43,18 +43,18 @@ namespace ManfredHorst
                 throw new ArgumentNullException(nameof(alarm));
             }
 
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
-            HttpClient httpClient = new HttpClient();
+            CancellationTokenSource cancellationToken = new();
+            HttpClient httpClient = new();
             HttpResponseMessage request = await httpClient.GetAsync(alarm.Url);
             cancellationToken.Token.ThrowIfCancellationRequested();
 
             Stream response = await request.Content.ReadAsStreamAsync();
             cancellationToken.Token.ThrowIfCancellationRequested();
 
-            HtmlParser parser = new HtmlParser();
+            HtmlParser parser = new();
             IHtmlDocument document = parser.ParseDocument(response);
 
-            GeizhalsProduct product = new GeizhalsProduct();
+            GeizhalsProduct product = new();
 
             if (alarm.Url.Contains("geizhals.de") && alarm.Url.Contains(".html?hloc"))
             {
@@ -78,9 +78,11 @@ namespace ManfredHorst
 
         public GeizhalsProduct GetProducts(IHtmlDocument document)
         {
-            GeizhalsProduct product = new GeizhalsProduct();
-            product.Name = document.All.Where(x => x.ClassName == "variant__header__headline").FirstOrDefault().TextContent.Trim();
-            product.Price = document.All.Where(x => x.ClassName == "gh_price").FirstOrDefault().TextContent.Replace("ab ", String.Empty).Replace("€ ", String.Empty).Trim();
+            GeizhalsProduct product = new()
+            {
+                Name = document.All.Where(x => x.ClassName == "variant__header__headline").FirstOrDefault().TextContent.Trim(),
+                Price = document.All.Where(x => x.ClassName == "gh_price").FirstOrDefault().TextContent.Replace("ab ", String.Empty).Replace("€ ", String.Empty).Trim()
+            };
 
             return product;
         }
