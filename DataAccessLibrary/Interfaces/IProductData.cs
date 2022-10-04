@@ -15,5 +15,7 @@ namespace DataAccessLibrary.Interfaces
         Task<List<Alarm>> GetAlarmsByMention(String mention);
 
         Task DeleteAlarm(String alias, String mention);
+
+        Task<List<UserAlarm>> GetAlarms();
     }
 }

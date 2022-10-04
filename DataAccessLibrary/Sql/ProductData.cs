@@ -13,13 +13,6 @@ namespace DataAccessLibrary.Sql
             this.Db = db;
         }
 
-        //public Task<Alarm> GetAlarms()
-        //{
-        //    String sql = $"SELECT * FROM url";
-
-        //    return this.Db.LoadInt64(sql);
-        //}
-
         public Task<Int64> GetUserByMention(String mention)
         {
             String sql = $"SELECT id FROM users WHERE mention = '{mention}'";
@@ -32,6 +25,13 @@ namespace DataAccessLibrary.Sql
             String sql = $@"Select url, alias, price From urls WHERE userid IN (SELECT id FROM users WHERE mention = '{mention}')";
 
             return this.Db.LoadData<Alarm, dynamic>(sql, new { });
+        }
+
+        public Task<List<UserAlarm>> GetAlarms()
+        {
+            String sql = $@"SELECT url, alias, price, mention FROM public.urls INNER JOIN users ON users.id = userid";
+
+            return this.Db.LoadData<UserAlarm, dynamic>(sql, new { });
         }
 
         public Task InsertUser(User user)

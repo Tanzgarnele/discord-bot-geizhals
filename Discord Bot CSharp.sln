@@ -5,7 +5,7 @@ VisualStudioVersion = 17.3.32901.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManfredHorst", "ManfredHorst\ManfredHorst.csproj", "{4D09133A-30DD-4616-BEFD-7AD40FAD5BCD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccessLibrary", "DataAccessLibrary\DataAccessLibrary.csproj", "{2EDB3714-E8ED-459A-B54A-C303D21A3281}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccessLibrary", "DataAccessLibrary\DataAccessLibrary.csproj", "{2EDB3714-E8ED-459A-B54A-C303D21A3281}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

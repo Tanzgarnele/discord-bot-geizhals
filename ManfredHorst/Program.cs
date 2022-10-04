@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Security.Cryptography.X509Certificates;
 
 namespace ManfredHorst
 {
@@ -31,9 +32,9 @@ namespace ManfredHorst
                     AlwaysDownloadUsers = true
                 }))
                 .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
+                .AddSingleton(x => new TimerService(x.GetRequiredService<DiscordSocketClient>()))
                 .AddSingleton(x => new CommandService())
                 .AddSingleton<InteractionHandler>()
-                .AddSingleton<PrefixHandler>()
                 .AddSingleton<ISqlDataAccess, SqlDataAccess>()
                 .AddSingleton<IProductData, ProductData>()
                 ).Build();
@@ -50,6 +51,7 @@ namespace ManfredHorst
             InteractionService commands = provider.GetRequiredService<InteractionService>();
 
             await provider.GetRequiredService<InteractionHandler>().InitalizeAsync();
+            await provider.GetRequiredService<TimerService>().InitalizeAsync();
 
             IConfigurationRoot config = provider.GetRequiredService<IConfigurationRoot>();
 

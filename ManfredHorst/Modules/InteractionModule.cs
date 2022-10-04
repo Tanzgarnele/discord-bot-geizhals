@@ -4,7 +4,6 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using ManfredHorst.Modules.Modal;
-using Microsoft.VisualBasic;
 using System.Text;
 
 namespace ManfredHorst.Modules
@@ -101,7 +100,15 @@ namespace ManfredHorst.Modules
             await this.productData.InsertUser(user);
             await this.productData.InsertAlarm(alarm);
 
-            await RespondAsync($"added!", allowedMentions: mentions, ephemeral: true);
+            //await RespondAsync($"added!", allowedMentions: mentions, ephemeral: true);
+            alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
+            await DeferAsync();
+            SocketModal? interaction = Context.Interaction as SocketModal;
+            await interaction.ModifyOriginalResponseAsync(x =>
+            {
+                x.Content = $"New alarm added!";
+                x.Embed = this.BuildEmbed().Build();
+            });
         }
 
         [ComponentInteraction("deletealarm")]
@@ -116,7 +123,14 @@ namespace ManfredHorst.Modules
             try
             {
                 await this.productData.DeleteAlarm(modal.Alias, Context.User.Mention);
-                await RespondAsync($"{Context.User.Mention} Alarm deleted!", ephemeral: true);
+                alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
+                await DeferAsync();
+                SocketModal? interaction = Context.Interaction as SocketModal;
+                await interaction.ModifyOriginalResponseAsync(x =>
+                {
+                    x.Content = $"Added new entry in database!";
+                    x.Embed = this.BuildEmbed().Build();
+                });
             }
             catch (Exception ex)
             {
@@ -134,14 +148,14 @@ namespace ManfredHorst.Modules
                 Style = ButtonStyle.Primary,
             };
 
-            ButtonBuilder addDebugAddButton = new ButtonBuilder()
-            {
-                Label = "Add Dbg",
-                CustomId = "adddbgalarm",
-                Style = ButtonStyle.Secondary,
-            };
+            //ButtonBuilder addDebugAddButton = new ButtonBuilder()
+            //{
+            //    Label = "Add Dbg",
+            //    CustomId = "adddbgalarm",
+            //    Style = ButtonStyle.Secondary,
+            //};
 
-            component.WithButton(addDebugAddButton);
+            //component.WithButton(addDebugAddButton);
             component.WithButton(addAlarmButton);
 
             if (alarms.Any() && alarms != null)
