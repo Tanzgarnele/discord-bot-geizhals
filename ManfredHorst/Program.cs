@@ -69,7 +69,7 @@ namespace ManfredHorst
                 }
             };
 
-            await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DiscordToken", EnvironmentVariableTarget.User));
+            await client.LoginAsync(Discord.TokenType.Bot, config["tokens:discord"]);
             await client.StartAsync();
 
             await Task.Delay(-1);
