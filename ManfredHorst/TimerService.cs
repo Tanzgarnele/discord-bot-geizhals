@@ -28,6 +28,13 @@ namespace ManfredHorst
 
                 foreach (UserAlarm alarm in userAlarms)
                 {
+                    IMessageChannel? chan = client.GetChannel(1027869007732285450) as IMessageChannel;
+
+                    if (chan != null)
+                    {
+                        await chan.SendMessageAsync($"Scanning now {DateTime.Now}");
+                    } 
+
                     await GetHtmlAsync(alarm);
                 }
             },
