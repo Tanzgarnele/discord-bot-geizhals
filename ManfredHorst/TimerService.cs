@@ -26,8 +26,7 @@ namespace ManfredHorst
                 this.productData = new ProductData(new SqlDataAccess());
                 userAlarms = await productData.GetAlarms();
 
-                IMessageChannel? chan = client.GetChannel(1027869007732285450) as IMessageChannel;
-                await chan.SendMessageAsync($"Scanning now {DateTime.Now}");
+                Console.WriteLine($"Scanning now {DateTime.Now}");
 
                 foreach (UserAlarm alarm in userAlarms)
                 {
