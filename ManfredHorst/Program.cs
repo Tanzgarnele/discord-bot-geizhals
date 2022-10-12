@@ -64,7 +64,9 @@ namespace ManfredHorst
                 Console.WriteLine($"DER DEUTSCHE BÄR IST ONLINE! {DateTime.Now}");
                 try
                 {
-                    await commands.RegisterCommandsGloballyAsync(true);
+                    //await commands.RegisterCommandsGloballyAsync(true);
+                    await commands.RegisterCommandsToGuildAsync(314770077943595010, true);
+                    await commands.RegisterCommandsToGuildAsync(700261898607788122, true);
                 }
                 catch (Exception ex)
                 {
