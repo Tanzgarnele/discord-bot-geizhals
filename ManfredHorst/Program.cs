@@ -1,5 +1,4 @@
 ﻿using DataAccessLibrary.Interfaces;
-using DataAccessLibrary.Models;
 using DataAccessLibrary.Sql;
 using Discord;
 using Discord.Commands;
@@ -55,15 +54,9 @@ namespace ManfredHorst
 
             IConfigurationRoot config = provider.GetRequiredService<IConfigurationRoot>();
 
-            client.Log += async (LogMessage msg) => 
-            { 
+            client.Log += async (LogMessage msg) =>
+            {
                 Console.WriteLine(msg.Message);
-                IMessageChannel? chan = client.GetChannel(1027869007732285450) as IMessageChannel;
-
-                if (chan != null)
-                {
-                    await chan.SendMessageAsync($"{msg.Message}");
-                }
             };
             commands.Log += async (LogMessage msg) => { Console.WriteLine(msg.Message); };
             client.Ready += async () =>
@@ -75,14 +68,7 @@ namespace ManfredHorst
                 }
                 catch (Exception ex)
                 {
-                    IMessageChannel? chan = client.GetChannel(1027869007732285450) as IMessageChannel;
-
-                    if (chan != null)
-                    {
-                        await chan.SendMessageAsync($"{ex.Message}");
-                    }
-
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine($"{ex.Message}");
                 }
             };
             await client.LoginAsync(Discord.TokenType.Bot, config["tokens:discord"]);

@@ -26,15 +26,11 @@ namespace ManfredHorst
                 this.productData = new ProductData(new SqlDataAccess());
                 userAlarms = await productData.GetAlarms();
 
+                IMessageChannel? chan = client.GetChannel(1027869007732285450) as IMessageChannel;
+                await chan.SendMessageAsync($"Scanning now {DateTime.Now}");
+
                 foreach (UserAlarm alarm in userAlarms)
                 {
-                    IMessageChannel? chan = client.GetChannel(1027869007732285450) as IMessageChannel;
-
-                    if (chan != null)
-                    {
-                        await chan.SendMessageAsync($"Scanning now {DateTime.Now}");
-                    } 
-
                     await GetHtmlAsync(alarm);
                 }
             },
@@ -77,6 +73,7 @@ namespace ManfredHorst
 
                 if (chan != null)
                 {
+                    Console.WriteLine($"Alarm {alarm.Alias} from {alarm.Mention} deleted {DateTime.Now}");
                     await chan.SendMessageAsync($"**{alarm.Alias}** below **{alarm.Price}€**\n{alarm.Url}\n {alarm.Mention} Alarm deleted!");
                 }
 

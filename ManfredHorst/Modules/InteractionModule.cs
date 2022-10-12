@@ -24,6 +24,7 @@ namespace ManfredHorst.Modules
         {
             alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
             await RespondAsync(embed: this.BuildEmbed().Build());
+            Console.WriteLine($"User {Context.User.Username} {Context.User.Mention} used the command /show-alarms {DateTime.Now}");
         }
 
         [SlashCommand("pricealarm", "Shows Current Alarms and lets you Add or Delete an Url from Geizhals.de")]
@@ -31,12 +32,15 @@ namespace ManfredHorst.Modules
         {
             alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
             await BuildAlarmEmbed(await this.productData.GetAlarmsByMention(Context.User.Mention));
+            Console.WriteLine($"User {Context.User.Username} {Context.User.Mention} used the command /pricealarm {DateTime.Now}");
         }
 
         [ComponentInteraction("addalarm")]
         public async Task HandleAddAlarmInput()
         {
             await RespondWithModalAsync<AddAlarmModal>("add_alarm_modal");
+            Console.WriteLine($"User {Context.User.Username} {Context.User.Mention} used the add button {DateTime.Now}");
+
         }
 
         [ComponentInteraction("adddbgalarm")]
@@ -64,22 +68,28 @@ namespace ManfredHorst.Modules
             if (String.IsNullOrWhiteSpace(modal.Alias))
             {
                 await RespondAsync($"{Context.User.Mention}Missing Name", allowedMentions: mentions, ephemeral: true);
+                Console.WriteLine($"{Context.User.Mention} Missing Name {DateTime.Now}");
             }
 
             if (String.IsNullOrWhiteSpace(modal.Url))
             {
                 await RespondAsync($"{Context.User.Mention} Missing url", allowedMentions: mentions, ephemeral: true);
+                Console.WriteLine($"{Context.User.Mention} Missing Url {DateTime.Now}");
+
             }
 
             if (!Uri.TryCreate(uriString: modal.Url, uriKind: UriKind.Absolute, result: out Uri uriResult)
             || uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps)
             {
                 await RespondAsync($"{Context.User.Mention} Not an Url", allowedMentions: mentions, ephemeral: true);
+                Console.WriteLine($"{Context.User.Mention} Not an Url {DateTime.Now}");
+
             }
 
             if (!modal.Url.Contains("geizhals.de"))
             {
                 await RespondAsync($"{Context.User.Mention} Nur Geizhals.de!!!!!!!!!!!!", allowedMentions: mentions, ephemeral: true);
+                Console.WriteLine($"{Context.User.Mention} Nur Geizhals.de! {DateTime.Now}");
             }
 
             User user = new User
@@ -109,12 +119,14 @@ namespace ManfredHorst.Modules
                 x.Content = $"New alarm added!";
                 x.Embed = this.BuildEmbed().Build();
             });
+            Console.WriteLine($"User {user.Username}-{user.Mention} added Alarm {modal.Alias} {modal.Url} {DateTime.Now}");
         }
 
         [ComponentInteraction("deletealarm")]
         public async Task HandleDeleteAlarmInput()
         {
             await RespondWithModalAsync<DeleteAlarmModal>("delete_alarm_modal");
+            Console.WriteLine($"User {Context.User.Username} {Context.User.Mention} used the delete button {DateTime.Now}");
         }
 
         [ModalInteraction("delete_alarm_modal")]
@@ -128,14 +140,16 @@ namespace ManfredHorst.Modules
                 SocketModal? interaction = Context.Interaction as SocketModal;
                 await interaction.ModifyOriginalResponseAsync(x =>
                 {
-                    x.Content = $"Added new entry in database!";
+                    x.Content = $"Deleted Alarm!";
                     x.Embed = this.BuildEmbed().Build();
                 });
+                Console.WriteLine($"Alarm {modal.Alias} deleted! {DateTime.Now}");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 await RespondAsync($"{Context.User.Mention} Error: could not find the name!");
+                Console.WriteLine($"{ex.Message} {DateTime.Now}");
             }
         }
 
