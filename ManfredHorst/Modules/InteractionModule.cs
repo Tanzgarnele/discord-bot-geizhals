@@ -3,9 +3,7 @@ using DataAccessLibrary.Models;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
-using ManfredHorst.Extensions;
 using ManfredHorst.Modules.Modal;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace ManfredHorst.Modules
@@ -33,8 +31,8 @@ namespace ManfredHorst.Modules
         [SlashCommand("pricealarm", "Shows Current Alarms and lets you Add or Delete an Url from Geizhals.de")]
         public async Task PriceAlarm()
         {
-            alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
-            await BuildAlarmEmbed(await this.productData.GetAlarmsByMention(Context.User.Mention));
+            await DeferAsync(true);
+            await BuildAlarmEmbed();
             Console.WriteLine($"User {Context.User.Username} {Context.User.Mention} used the command /pricealarm {DateTime.Now}");
         }
 
@@ -62,6 +60,8 @@ namespace ManfredHorst.Modules
         [ModalInteraction("add_alarm_modal")]
         public async Task ModalResponse(AddAlarmModal modal)
         {
+            await DeferAsync();
+
             AllowedMentions mentions = new AllowedMentions
             {
                 AllowedTypes = AllowedMentionTypes.Users
@@ -112,7 +112,7 @@ namespace ManfredHorst.Modules
 
             //await RespondAsync($"added!", allowedMentions: mentions, ephemeral: true);
             alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
-            await DeferAsync();
+
             SocketModal interaction = Context.Interaction as SocketModal;
             await interaction.ModifyOriginalResponseAsync(x =>
             {
@@ -132,11 +132,11 @@ namespace ManfredHorst.Modules
         [ModalInteraction("delete_alarm_modal")]
         public async Task ModalResponse(DeleteAlarmModal modal)
         {
+            await DeferAsync();
             try
             {
                 await this.productData.DeleteAlarm(modal.Alias, Context.User.Mention);
                 alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
-                await DeferAsync();
                 SocketModal interaction = Context.Interaction as SocketModal;
                 await interaction.ModifyOriginalResponseAsync(x =>
                 {
@@ -153,7 +153,7 @@ namespace ManfredHorst.Modules
             }
         }
 
-        public async Task BuildAlarmEmbed(List<Alarm> alarms)
+        public async Task BuildAlarmEmbed()
         {
             ButtonBuilder addAlarmButton = new ButtonBuilder()
             {
@@ -172,6 +172,8 @@ namespace ManfredHorst.Modules
             //component.WithButton(addDebugAddButton);
             component.WithButton(addAlarmButton);
 
+            alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
+
             if (alarms.Any() && alarms != null)
             {
                 ButtonBuilder deleteAlarmButton = new ButtonBuilder()
@@ -183,7 +185,6 @@ namespace ManfredHorst.Modules
 
                 component.WithButton(deleteAlarmButton);
             }
-            await DeferAsync(true);
 
             await ModifyOriginalResponseAsync(x => x.Embeds = this.BuildEmbed().ToArray());
             await ModifyOriginalResponseAsync(x => x.Components = component.Build());
@@ -265,37 +266,5 @@ namespace ManfredHorst.Modules
             }
             return emb;
         }
-
-        //public EmbedBuilder BuildEmbed()
-        //{
-        //    EmbedBuilder embed = new EmbedBuilder();
-        //    StringBuilder stringbuilderAliasUrl = new StringBuilder();
-        //    StringBuilder stringbuilderPrice = new StringBuilder();
-        //    StringBuilder stringbuilderIndex = new StringBuilder();
-
-        //    if (alarms.Any() && alarms != null)
-        //    {
-        //        Int64 index = 0;
-        //        foreach (Alarm alarm in alarms)
-        //        {
-        //            stringbuilderAliasUrl.Append($"[{alarm.Alias}]({alarm.Url})\n");
-        //            stringbuilderPrice.Append($"{alarm.Price}€\n");
-        //            stringbuilderIndex.Append($"{++index}\n");
-        //        }
-
-        //        embed.AddField("Nr.", $"{stringbuilderIndex}", true)
-        //            .AddField("Name", $"{stringbuilderAliasUrl}", true)
-        //            .AddField("Price", $"{stringbuilderPrice}", true)
-        //            .WithAuthor(Context.Client.CurrentUser)
-        //            .WithColor(Color.Orange)
-        //            .WithTitle($"Alarms: {index}".Truncate(9))
-        //        .WithCurrentTimestamp();
-        //    }
-        //    else
-        //    {
-        //        embed.Title = "Alarms: 0";
-        //    }
-        //    return embed;
-        //}
     }
 }
