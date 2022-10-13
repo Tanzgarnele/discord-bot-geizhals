@@ -19,7 +19,8 @@ namespace ManfredHorst
             GatewayIntents = GatewayIntents.AllUnprivileged,
             AlwaysDownloadUsers = true,
             LogLevel = LogSeverity.Info,
-            MessageCacheSize = 50
+            MessageCacheSize = 50,
+            UseInteractionSnowflakeDate = true,
         };
 
         public Program()
