@@ -20,7 +20,6 @@ namespace ManfredHorst
 			AlwaysDownloadUsers = true,
 			LogLevel = LogSeverity.Info,
 			MessageCacheSize = 50,
-			UseInteractionSnowflakeDate = true,
 		};
 
 		public Program()
