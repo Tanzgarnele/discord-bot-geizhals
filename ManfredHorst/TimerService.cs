@@ -9,9 +9,9 @@ namespace ManfredHorst
 {
     public class TimerService
     {
-        private Timer timer;
         private ProductData productData;
         private readonly DiscordSocketClient client;
+        private Timer timer;
 
         public TimerService(DiscordSocketClient client)
         {
@@ -20,17 +20,20 @@ namespace ManfredHorst
 
         public async Task InitalizeAsync()
         {
+            //Console.WriteLine($"Starting scan {DateTime.Now}");
+
             timer = new Timer(async _ =>
             {
                 List<UserAlarm> userAlarms = new List<UserAlarm>();
                 this.productData = new ProductData(new SqlDataAccess());
                 userAlarms = await productData.GetAlarms();
 
-                Console.WriteLine($"Scanning now {DateTime.Now}");
+                //Console.WriteLine($"Starting scan {DateTime.Now}");
 
                 foreach (UserAlarm alarm in userAlarms)
                 {
                     await GetHtmlAsync(alarm);
+                    await Task.Delay(TimeSpan.FromSeconds(5));
                 }
             },
             null,
@@ -44,6 +47,8 @@ namespace ManfredHorst
             {
                 throw new ArgumentNullException(nameof(alarm));
             }
+
+            Console.WriteLine($"Starting scan {DateTime.Now}");
 
             CancellationTokenSource cancellationToken = new();
             HttpClient httpClient = new();
@@ -68,7 +73,7 @@ namespace ManfredHorst
             if (Convert.ToDouble(product.Price) <= Convert.ToDouble(alarm.Price) && Convert.ToDouble(alarm.Price) != 0 && Convert.ToDouble(product.Price) != 0)
             {
                 //IMessageChannel? chan = client.GetChannel(785318419750191114) as IMessageChannel;
-                IMessageChannel? chan = client.GetChannel(570446080697827334) as IMessageChannel;
+                IMessageChannel chan = client.GetChannel(570446080697827334) as IMessageChannel;
 
                 if (chan != null)
                 {
@@ -82,12 +87,27 @@ namespace ManfredHorst
 
         public GeizhalsProduct GetProducts(IHtmlDocument document)
         {
-            GeizhalsProduct product = new()
+            if (document is null)
             {
-                Name = document.All.Where(x => x.ClassName == "variant__header__headline").FirstOrDefault().TextContent.Trim(),
-                Price = document.QuerySelectorAll("div.offer__price .gh_price").FirstOrDefault().TextContent.Replace("ab ", String.Empty).Replace("€ ", String.Empty).Trim()
-            };
+                throw new ArgumentNullException(nameof(document));
+            }
 
+            GeizhalsProduct product = new GeizhalsProduct();
+            if (document.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                product.Name = document.All.FirstOrDefault(x => x.ClassName == "variant__header__headline")
+                    .TextContent.Trim();
+
+                product.Price = document.QuerySelectorAll("div.offer__price .gh_price")
+                    .FirstOrDefault().TextContent
+                    .Replace("ab ", String.Empty)
+                    .Replace("€ ", String.Empty)
+                    .Trim();
+            }
+            else
+            {
+                Console.WriteLine($"Error: {document.StatusCode}");
+            }
             return product;
         }
     }

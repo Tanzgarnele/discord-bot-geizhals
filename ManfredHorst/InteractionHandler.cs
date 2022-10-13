@@ -20,27 +20,50 @@ namespace ManfredHorst
 
         public async Task InitalizeAsync()
         {
+            this.client.Ready += ReadyAsync;
+            this.commands.Log += LogAsync;
+
             await this.commands.AddModulesAsync(Assembly.GetEntryAssembly(), this.services);
 
             client.InteractionCreated += HandleInteraction;
+        }
+
+        private async Task ReadyAsync()
+        {
+            await this.commands.RegisterCommandsGloballyAsync(true);
         }
 
         private async Task HandleInteraction(SocketInteraction arg)
         {
             try
             {
-                SocketInteractionContext context = new SocketInteractionContext(this.client, arg);
-                await this.commands.ExecuteCommandAsync(context, this.services);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
+                SocketInteractionContext context = new SocketInteractionContext(client, arg);
 
-                if (arg.Type == InteractionType.ApplicationCommand)
+                IResult result = await commands.ExecuteCommandAsync(context, this.services);
+
+                if (!result.IsSuccess)
+                {
+                    switch (result.Error)
+                    {
+                        case InteractionCommandError.UnmetPrecondition:
+                            Console.WriteLine(result.Error);
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            }
+            catch
+            {
+                if (arg.Type is InteractionType.ApplicationCommand)
                 {
                     await arg.GetOriginalResponseAsync().ContinueWith(async (msg) => await msg.Result.DeleteAsync());
                 }
             }
         }
+
+        private async Task LogAsync(LogMessage log)
+           => Console.WriteLine(log);
     }
 }

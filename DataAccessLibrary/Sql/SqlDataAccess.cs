@@ -20,6 +20,7 @@ namespace DataAccessLibrary.Sql
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -47,6 +48,7 @@ namespace DataAccessLibrary.Sql
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -62,6 +64,7 @@ namespace DataAccessLibrary.Sql
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }

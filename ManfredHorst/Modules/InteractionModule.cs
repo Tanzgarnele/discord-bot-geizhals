@@ -3,6 +3,7 @@ using DataAccessLibrary.Models;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using ManfredHorst.Extensions;
 using ManfredHorst.Modules.Modal;
 using System.Text;
 
@@ -10,20 +11,20 @@ namespace ManfredHorst.Modules
 {
     public class InteractionModule : InteractionModuleBase<SocketInteractionContext>
     {
-        private IProductData? productData;
+        private IProductData productData;
         private ComponentBuilder component = new ComponentBuilder();
         private List<Alarm> alarms;
 
         public InteractionModule(IProductData productData)
         {
-            this.productData = productData;
+            this.productData = productData ?? throw new ArgumentNullException(nameof(productData));
         }
 
         [SlashCommand("show-alarms", "Shows your current alarms")]
         public async Task ShowAlarms()
         {
             alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
-            await RespondAsync(embed: this.BuildEmbed().Build());
+            await RespondAsync(embeds: this.BuildEmbed().ToArray());
             Console.WriteLine($"User {Context.User.Username} {Context.User.Mention} used the command /show-alarms {DateTime.Now}");
         }
 
@@ -40,7 +41,6 @@ namespace ManfredHorst.Modules
         {
             await RespondWithModalAsync<AddAlarmModal>("add_alarm_modal");
             Console.WriteLine($"User {Context.User.Username} {Context.User.Mention} used the add button {DateTime.Now}");
-
         }
 
         [ComponentInteraction("adddbgalarm")]
@@ -49,11 +49,11 @@ namespace ManfredHorst.Modules
             await this.productData.InsertDEBUGAlarm();
             alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
 
-            var context = Context.Interaction as SocketMessageComponent;
+            SocketMessageComponent context = Context.Interaction as SocketMessageComponent;
             await context.UpdateAsync(x =>
             {
                 x.Content = $"Added new entry in database!";
-                x.Embed = this.BuildEmbed().Build();
+                x.Embeds = this.BuildEmbed().ToArray();
             });
         }
 
@@ -75,7 +75,6 @@ namespace ManfredHorst.Modules
             {
                 await RespondAsync($"{Context.User.Mention} Missing url", allowedMentions: mentions, ephemeral: true);
                 Console.WriteLine($"{Context.User.Mention} Missing Url {DateTime.Now}");
-
             }
 
             if (!Uri.TryCreate(uriString: modal.Url, uriKind: UriKind.Absolute, result: out Uri uriResult)
@@ -83,7 +82,6 @@ namespace ManfredHorst.Modules
             {
                 await RespondAsync($"{Context.User.Mention} Not an Url", allowedMentions: mentions, ephemeral: true);
                 Console.WriteLine($"{Context.User.Mention} Not an Url {DateTime.Now}");
-
             }
 
             if (!modal.Url.Contains("geizhals.de"))
@@ -113,11 +111,11 @@ namespace ManfredHorst.Modules
             //await RespondAsync($"added!", allowedMentions: mentions, ephemeral: true);
             alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
             await DeferAsync();
-            SocketModal? interaction = Context.Interaction as SocketModal;
+            SocketModal interaction = Context.Interaction as SocketModal;
             await interaction.ModifyOriginalResponseAsync(x =>
             {
                 x.Content = $"New alarm added!";
-                x.Embed = this.BuildEmbed().Build();
+                x.Embeds = this.BuildEmbed().ToArray();
             });
             Console.WriteLine($"User {user.Username}-{user.Mention} added Alarm {modal.Alias} {modal.Url} {DateTime.Now}");
         }
@@ -137,11 +135,11 @@ namespace ManfredHorst.Modules
                 await this.productData.DeleteAlarm(modal.Alias, Context.User.Mention);
                 alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
                 await DeferAsync();
-                SocketModal? interaction = Context.Interaction as SocketModal;
+                SocketModal interaction = Context.Interaction as SocketModal;
                 await interaction.ModifyOriginalResponseAsync(x =>
                 {
                     x.Content = $"Deleted Alarm!";
-                    x.Embed = this.BuildEmbed().Build();
+                    x.Embeds = this.BuildEmbed().ToArray();
                 });
                 Console.WriteLine($"Alarm {modal.Alias} deleted! {DateTime.Now}");
             }
@@ -184,39 +182,116 @@ namespace ManfredHorst.Modules
                 component.WithButton(deleteAlarmButton);
             }
 
-            await RespondAsync(embed: this.BuildEmbed().Build(), components: component.Build(), ephemeral: true);
+            await RespondAsync(embeds: this.BuildEmbed().ToArray(), components: component.Build(), ephemeral: true);
         }
 
-        public EmbedBuilder BuildEmbed()
+        public List<Embed> BuildEmbed()
         {
-            EmbedBuilder embed = new EmbedBuilder();
+            List<EmbedBuilder> embed = new();
             StringBuilder stringbuilderAliasUrl = new StringBuilder();
             StringBuilder stringbuilderPrice = new StringBuilder();
             StringBuilder stringbuilderIndex = new StringBuilder();
+            List<Embed> emb = new();
 
             if (alarms.Any() && alarms != null)
             {
                 Int64 index = 0;
                 foreach (Alarm alarm in alarms)
                 {
-                    stringbuilderAliasUrl.Append($"[{alarm.Alias}]({alarm.Url})\n");
-                    stringbuilderPrice.Append($"{alarm.Price}€\n");
-                    stringbuilderIndex.Append($"{++index}\n");
+                    stringbuilderAliasUrl.Append($"[{alarm.Alias}]({alarm.Url});");
+                    stringbuilderPrice.Append($"{alarm.Price}€;");
+                    stringbuilderIndex.Append($"{++index};");
                 }
 
-                embed.AddField("Nr.", $"{stringbuilderIndex}", true)
-                    .AddField("Name", $"{stringbuilderAliasUrl}", true)
-                    .AddField("Price", $"{stringbuilderPrice}", true)
-                    .WithAuthor(Context.Client.CurrentUser)
-                    .WithColor(Color.Orange)
-                    .WithTitle($"Alarms: {index}")
-                .WithCurrentTimestamp();
+                String[] aliasUrl = stringbuilderAliasUrl.ToString().TrimEnd(';').Split(';');
+                String[] price = stringbuilderPrice.ToString().TrimEnd(';').Split(';');
+                String[] stringIndex = stringbuilderIndex.ToString().TrimEnd(';').Split(';');
+
+                int thirdindex = 0;
+                for (int i = 0; i <= Math.Ceiling((Double)aliasUrl.Count() / 5); i++)
+                {
+                    StringBuilder fiveAliasUrl = new StringBuilder();
+                    StringBuilder fivePrice = new StringBuilder();
+                    StringBuilder fiveStringIndex = new StringBuilder();
+
+                    for (int y = 0; y < 5; y++)
+                    {
+                        if (thirdindex != aliasUrl.Count())
+                        {
+                            fiveAliasUrl.Append($"{aliasUrl[thirdindex]}\n");
+                            fivePrice.Append($"{price[thirdindex]}\n");
+                            fiveStringIndex.Append($"{stringIndex[thirdindex]}\n");
+                            thirdindex++;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                    if (fiveStringIndex.Length != 0)
+                    {
+                        embed.Add(new EmbedBuilder()
+                                .AddField("Nr.", $"{fiveStringIndex}", true)
+                                .AddField("Name", $"{fiveAliasUrl}", true)
+                                .AddField("Price", $"{fivePrice}", true)
+                                .WithAuthor(Context.User)
+                                .WithColor(Color.Green)
+                                .WithCurrentTimestamp());
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
             }
             else
             {
-                embed.Title = "Alarms: 0";
+                return new List<Embed>()
+                {
+                        new EmbedBuilder()
+                            .WithAuthor(Context.Client.CurrentUser)
+                            .WithColor(Color.Red)
+                            .WithTitle($"Alarms: 0")
+                            .WithCurrentTimestamp().Build()
+                };
             }
-            return embed;
+            foreach (EmbedBuilder item in embed)
+            {
+                emb.Add(item.Build());
+            }
+            return emb;
         }
+
+        //public EmbedBuilder BuildEmbed()
+        //{
+        //    EmbedBuilder embed = new EmbedBuilder();
+        //    StringBuilder stringbuilderAliasUrl = new StringBuilder();
+        //    StringBuilder stringbuilderPrice = new StringBuilder();
+        //    StringBuilder stringbuilderIndex = new StringBuilder();
+
+        //    if (alarms.Any() && alarms != null)
+        //    {
+        //        Int64 index = 0;
+        //        foreach (Alarm alarm in alarms)
+        //        {
+        //            stringbuilderAliasUrl.Append($"[{alarm.Alias}]({alarm.Url})\n");
+        //            stringbuilderPrice.Append($"{alarm.Price}€\n");
+        //            stringbuilderIndex.Append($"{++index}\n");
+        //        }
+
+        //        embed.AddField("Nr.", $"{stringbuilderIndex}", true)
+        //            .AddField("Name", $"{stringbuilderAliasUrl}", true)
+        //            .AddField("Price", $"{stringbuilderPrice}", true)
+        //            .WithAuthor(Context.Client.CurrentUser)
+        //            .WithColor(Color.Orange)
+        //            .WithTitle($"Alarms: {index}".Truncate(9))
+        //        .WithCurrentTimestamp();
+        //    }
+        //    else
+        //    {
+        //        embed.Title = "Alarms: 0";
+        //    }
+        //    return embed;
+        //}
     }
 }
