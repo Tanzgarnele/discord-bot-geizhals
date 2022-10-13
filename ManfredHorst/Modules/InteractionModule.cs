@@ -5,6 +5,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using ManfredHorst.Extensions;
 using ManfredHorst.Modules.Modal;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace ManfredHorst.Modules
@@ -24,7 +25,8 @@ namespace ManfredHorst.Modules
         public async Task ShowAlarms()
         {
             alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
-            await RespondAsync(embeds: this.BuildEmbed().ToArray());
+            await DeferAsync();
+            await ModifyOriginalResponseAsync(x => x.Embeds = this.BuildEmbed().ToArray());
             Console.WriteLine($"User {Context.User.Username} {Context.User.Mention} used the command /show-alarms {DateTime.Now}");
         }
 
@@ -181,8 +183,10 @@ namespace ManfredHorst.Modules
 
                 component.WithButton(deleteAlarmButton);
             }
+            await DeferAsync(true);
 
-            await RespondAsync(embeds: this.BuildEmbed().ToArray(), components: component.Build(), ephemeral: true);
+            await ModifyOriginalResponseAsync(x => x.Embeds = this.BuildEmbed().ToArray());
+            await ModifyOriginalResponseAsync(x => x.Components = component.Build());
         }
 
         public List<Embed> BuildEmbed()
