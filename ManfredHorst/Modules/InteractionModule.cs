@@ -23,7 +23,7 @@ namespace ManfredHorst.Modules
         public async Task ShowAlarms()
         {
             await DeferAsync();
-            await ModifyOriginalResponseAsync(x => x.Embeds = this.BuildEmbed().ToArray());
+            await FollowupAsync(embeds: this.BuildEmbed().ToArray());
             Console.WriteLine($"User {Context.User.Username} {Context.User.Mention} used the command /show-alarms {DateTime.Now}");
         }
 
@@ -183,8 +183,7 @@ namespace ManfredHorst.Modules
                 component.WithButton(deleteAlarmButton);
             }
 
-            await ModifyOriginalResponseAsync(x => x.Embeds = this.BuildEmbed().ToArray());
-            await ModifyOriginalResponseAsync(x => x.Components = component.Build());
+            await FollowupAsync(embeds: this.BuildEmbed().ToArray(), components: component.Build());
         }
 
         public List<Embed> BuildEmbed()
