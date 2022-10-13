@@ -22,7 +22,6 @@ namespace ManfredHorst.Modules
         [SlashCommand("show-alarms", "Shows your current alarms")]
         public async Task ShowAlarms()
         {
-            alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
             await DeferAsync();
             await ModifyOriginalResponseAsync(x => x.Embeds = this.BuildEmbed().ToArray());
             Console.WriteLine($"User {Context.User.Username} {Context.User.Mention} used the command /show-alarms {DateTime.Now}");
@@ -47,7 +46,6 @@ namespace ManfredHorst.Modules
         public async Task HandleAddDbgAlarmInput()
         {
             await this.productData.InsertDEBUGAlarm();
-            alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
 
             SocketMessageComponent context = Context.Interaction as SocketMessageComponent;
             await context.UpdateAsync(x =>
@@ -111,7 +109,7 @@ namespace ManfredHorst.Modules
             await this.productData.InsertAlarm(alarm);
 
             //await RespondAsync($"added!", allowedMentions: mentions, ephemeral: true);
-            alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
+            await this.productData.GetAlarmsByMention(Context.User.Mention);
 
             SocketModal interaction = Context.Interaction as SocketModal;
             await interaction.ModifyOriginalResponseAsync(x =>
@@ -136,7 +134,6 @@ namespace ManfredHorst.Modules
             try
             {
                 await this.productData.DeleteAlarm(modal.Alias, Context.User.Mention);
-                alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
                 SocketModal interaction = Context.Interaction as SocketModal;
                 await interaction.ModifyOriginalResponseAsync(x =>
                 {
@@ -192,6 +189,7 @@ namespace ManfredHorst.Modules
 
         public List<Embed> BuildEmbed()
         {
+            alarms = this.productData.GetAlarmsByMention(Context.User.Mention).GetAwaiter().GetResult();
             List<EmbedBuilder> embed = new();
             StringBuilder stringbuilderAliasUrl = new StringBuilder();
             StringBuilder stringbuilderPrice = new StringBuilder();
