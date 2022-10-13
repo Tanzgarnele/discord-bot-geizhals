@@ -22,8 +22,8 @@ namespace ManfredHorst.Modules
         [SlashCommand("show-alarms", "Shows your current alarms")]
         public async Task ShowAlarms()
         {
-            //await DeferAsync();
-            await RespondAsync(embeds: this.BuildEmbed().ToArray());
+            await DeferAsync();
+            await FollowupAsync(embeds: this.BuildEmbed().ToArray());
             Console.WriteLine($"User {Context.User.Username} {Context.User.Mention} used the command /show-alarms {DateTime.Now}");
         }
 
