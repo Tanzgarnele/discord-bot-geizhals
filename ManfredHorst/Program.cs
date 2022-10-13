@@ -53,7 +53,7 @@ namespace ManfredHorst
 			client.Log += LogAsync;
 
 			await this.services.GetRequiredService<InteractionHandler>().InitalizeAsync();
-			//await this.services.GetRequiredService<TimerService>().InitalizeAsync();
+			await this.services.GetRequiredService<TimerService>().InitalizeAsync();
 
 			await client.LoginAsync(TokenType.Bot, this.config["tokens:discord"]);
 			await client.StartAsync();
