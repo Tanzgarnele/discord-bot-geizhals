@@ -22,16 +22,15 @@ namespace ManfredHorst.Modules
         [SlashCommand("show-alarms", "Shows your current alarms")]
         public async Task ShowAlarms()
         {
-            await DeferAsync();
-            await FollowupAsync(embeds: this.BuildEmbed().ToArray());
+            await RespondAsync(embeds: this.BuildEmbed().ToArray());
             Console.WriteLine($"User {Context.User.Username} {Context.User.Mention} used the command /show-alarms {DateTime.Now}");
         }
 
         [SlashCommand("pricealarm", "Shows Current Alarms and lets you Add or Delete an Url from Geizhals.de")]
         public async Task PriceAlarm()
         {
-            await DeferAsync(true);
-            await BuildAlarmEmbed();
+            await BuildComponents();
+            await RespondAsync(embeds: this.BuildEmbed().ToArray(), components: component.Build(), ephemeral: true);
             Console.WriteLine($"User {Context.User.Username} {Context.User.Mention} used the command /pricealarm {DateTime.Now}");
         }
 
@@ -58,8 +57,6 @@ namespace ManfredHorst.Modules
         [ModalInteraction("add_alarm_modal")]
         public async Task ModalResponse(AddAlarmModal modal)
         {
-            await DeferAsync();
-
             AllowedMentions mentions = new AllowedMentions
             {
                 AllowedTypes = AllowedMentionTypes.Users
@@ -94,28 +91,30 @@ namespace ManfredHorst.Modules
             {
                 Mention = Context.User.Mention,
                 Username = Context.User.Username,
-                LastSeen = DateTime.Now
+                EntryDate = DateTime.Now
             };
+
+            await this.productData.InsertUser(user);
 
             Alarm alarm = new Alarm
             {
                 Url = modal.Url,
                 Alias = modal.Alias,
                 Price = modal.Price,
-                UserId = await this.productData.GetUserByMention(user.Mention)
+                UserId = await this.productData.GetUserByMention(user.Mention),
+                EntryDate = DateTime.Now
             };
 
-            await this.productData.InsertUser(user);
             await this.productData.InsertAlarm(alarm);
 
-            //await RespondAsync($"added!", allowedMentions: mentions, ephemeral: true);
-            await this.productData.GetAlarmsByMention(Context.User.Mention);
-
+            await DeferAsync();
+            await BuildComponents();
             SocketModal interaction = Context.Interaction as SocketModal;
             await interaction.ModifyOriginalResponseAsync(x =>
             {
                 x.Content = $"New alarm added!";
                 x.Embeds = this.BuildEmbed().ToArray();
+                x.Components = component.Build();
             });
             Console.WriteLine($"User {user.Username}-{user.Mention} added Alarm {modal.Alias} {modal.Url} {DateTime.Now}");
         }
@@ -130,15 +129,18 @@ namespace ManfredHorst.Modules
         [ModalInteraction("delete_alarm_modal")]
         public async Task ModalResponse(DeleteAlarmModal modal)
         {
-            await DeferAsync();
             try
             {
+                await DeferAsync();
                 await this.productData.DeleteAlarm(modal.Alias, Context.User.Mention);
+                await BuildComponents();
+
                 SocketModal interaction = Context.Interaction as SocketModal;
                 await interaction.ModifyOriginalResponseAsync(x =>
                 {
                     x.Content = $"Deleted Alarm!";
                     x.Embeds = this.BuildEmbed().ToArray();
+                    x.Components = component.Build();
                 });
                 Console.WriteLine($"Alarm {modal.Alias} deleted! {DateTime.Now}");
             }
@@ -150,7 +152,7 @@ namespace ManfredHorst.Modules
             }
         }
 
-        public async Task BuildAlarmEmbed()
+        public async Task BuildComponents()
         {
             ButtonBuilder addAlarmButton = new ButtonBuilder()
             {
@@ -159,14 +161,6 @@ namespace ManfredHorst.Modules
                 Style = ButtonStyle.Primary,
             };
 
-            //ButtonBuilder addDebugAddButton = new ButtonBuilder()
-            //{
-            //    Label = "Add Dbg",
-            //    CustomId = "adddbgalarm",
-            //    Style = ButtonStyle.Secondary,
-            //};
-
-            //component.WithButton(addDebugAddButton);
             component.WithButton(addAlarmButton);
 
             alarms = await this.productData.GetAlarmsByMention(Context.User.Mention);
@@ -182,8 +176,6 @@ namespace ManfredHorst.Modules
 
                 component.WithButton(deleteAlarmButton);
             }
-
-            await FollowupAsync(embeds: this.BuildEmbed().ToArray(), components: component.Build());
         }
 
         public List<Embed> BuildEmbed()

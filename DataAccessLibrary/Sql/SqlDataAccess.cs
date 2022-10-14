@@ -1,13 +1,14 @@
 ﻿using Dapper;
 using DataAccessLibrary.Interfaces;
-using Npgsql;
 using System.Data;
+using System.Data.SqlClient;
 
 namespace DataAccessLibrary.Sql
 {
     public class SqlDataAccess : ISqlDataAccess
     {
-        public String ConnectionStringName { get; set; } = "User ID=SA;Password=TEST123;Host=192.168.178.77;Port=49153;Database=GeizhalsDiscord;";
+        //public String ConnectionStringName { get; set; } = "User ID=SA;Password=TEST123;Host=192.168.178.77;Port=49153;Database=GeizhalsDiscord;";
+        public String ConnectionStringName { get; set; } = "Data Source=192.168.178.55,1433;User ID=sa;Password=Test@Tester1234;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Database=GeizhalsDiscord;";
 
         public async Task<Int64> LoadScalarData(String sql)
         {
@@ -15,7 +16,7 @@ namespace DataAccessLibrary.Sql
 
             try
             {
-                using IDbConnection connection = new NpgsqlConnection(connectionString);
+                using IDbConnection connection = new SqlConnection(connectionString);
                 return await connection.ExecuteScalarAsync<Int64>(sql);
             }
             catch (Exception ex)
@@ -29,7 +30,7 @@ namespace DataAccessLibrary.Sql
         {
             String connectionString = this.ConnectionStringName;
 
-            using (IDbConnection connection = new NpgsqlConnection(connectionString))
+            using (IDbConnection connection = new SqlConnection(connectionString))
             {
                 IEnumerable<T> data = await connection.QueryAsync<T>(sql, parameters);
 
@@ -43,7 +44,7 @@ namespace DataAccessLibrary.Sql
 
             try
             {
-                using IDbConnection connection = new NpgsqlConnection(connectionString);
+                using IDbConnection connection = new SqlConnection(connectionString);
                 await connection.ExecuteAsync(sql, parameters);
             }
             catch (Exception ex)
@@ -59,7 +60,7 @@ namespace DataAccessLibrary.Sql
 
             try
             {
-                using IDbConnection connection = new NpgsqlConnection(connectionString);
+                using IDbConnection connection = new SqlConnection(connectionString);
                 await connection.ExecuteAsync(sql);
             }
             catch (Exception ex)
