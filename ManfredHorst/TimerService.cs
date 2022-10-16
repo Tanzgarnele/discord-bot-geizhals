@@ -21,24 +21,30 @@ namespace ManfredHorst
         public async Task InitalizeAsync()
         {
             //Console.WriteLine($"Starting scan {DateTime.Now}");
-
-            timer = new Timer(async _ =>
+            try
             {
-                List<UserAlarm> userAlarms = new List<UserAlarm>();
-                this.productData = new ProductData(new SqlDataAccess());
-                userAlarms = await productData.GetAlarms();
-
-                //Console.WriteLine($"Starting scan {DateTime.Now}");
-
-                foreach (UserAlarm alarm in userAlarms)
+                timer = new Timer(async _ =>
                 {
-                    await GetHtmlAsync(alarm);
-                    await Task.Delay(TimeSpan.FromSeconds(5));
-                }
-            },
-            null,
-            TimeSpan.FromSeconds(5),
-            TimeSpan.FromMinutes(20));
+                    List<UserAlarm> userAlarms = new List<UserAlarm>();
+                    this.productData = new ProductData(new SqlDataAccess());
+                    userAlarms = await productData.GetAlarms();
+
+                    //Console.WriteLine($"Starting scan {DateTime.Now}");
+
+                    foreach (UserAlarm alarm in userAlarms)
+                    {
+                        await GetHtmlAsync(alarm);
+                        await Task.Delay(TimeSpan.FromSeconds(5));
+                    }
+                },
+                null,
+                TimeSpan.FromSeconds(5),
+                TimeSpan.FromMinutes(20));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
 
         private async Task GetHtmlAsync(UserAlarm alarm)
@@ -48,7 +54,7 @@ namespace ManfredHorst
                 throw new ArgumentNullException(nameof(alarm));
             }
 
-            Console.WriteLine($"Starting scan {DateTime.Now}");
+            Console.WriteLine($"Scanning {alarm.Alias} {DateTime.Now}");
 
             CancellationTokenSource cancellationToken = new();
             HttpClient httpClient = new();
@@ -68,6 +74,7 @@ namespace ManfredHorst
                 product = GetProducts(document);
                 product.LatestTime = DateTime.Now;
                 product.ProductUrl = alarm.Url;
+                Console.WriteLine($"Checking {alarm.Alias} {alarm.Price}€ Current Price at: {product.Price}€");
             }
 
             if (Convert.ToDouble(product.Price) <= Convert.ToDouble(alarm.Price) && Convert.ToDouble(alarm.Price) != 0 && Convert.ToDouble(product.Price) != 0)
