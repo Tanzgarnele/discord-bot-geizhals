@@ -33,7 +33,7 @@ namespace ManfredHorst
 				.AddSingleton(this.socketConfig)
 				.AddSingleton<DiscordSocketClient>()
 				.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
-				.AddSingleton(x => new TimerService(x.GetRequiredService<DiscordSocketClient>()))
+				.AddSingleton(x => new TimerService(x.GetRequiredService<DiscordSocketClient>(), this.config))
 				.AddSingleton<InteractionHandler>()
 				.AddSingleton<ISqlDataAccess, SqlDataAccess>()
 				.AddSingleton<IProductData, ProductData>()
