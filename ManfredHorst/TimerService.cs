@@ -69,7 +69,7 @@ namespace ManfredHorst
 
             GeizhalsProduct product = new();
 
-            if (alarm.Url.Contains("geizhals.de") && alarm.Url.Contains(".html?hloc"))
+            if (alarm.Url.Contains("geizhals.de") && alarm.Url.Contains(".htm"))
             {
                 product = GetProducts(document);
                 product.LatestTime = DateTime.Now;
@@ -77,7 +77,7 @@ namespace ManfredHorst
                 Console.WriteLine($"Checking {alarm.Alias} {alarm.Price}€ Current Price at: {product.Price}€");
             }
 
-            if (Convert.ToDouble(product.Price) <= Convert.ToDouble(alarm.Price) && Convert.ToDouble(alarm.Price) != 0 && Convert.ToDouble(product.Price) != 0)
+            if (Convert.ToDouble(product.Price) <= Convert.ToDouble(alarm.Price) && String.IsNullOrWhiteSpace(product.Price))
             {
                 //IMessageChannel? chan = client.GetChannel(785318419750191114) as IMessageChannel;
                 IMessageChannel chan = client.GetChannel(570446080697827334) as IMessageChannel;
