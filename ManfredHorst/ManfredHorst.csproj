@@ -6,7 +6,6 @@
     <RootNamespace>ManfredHorst</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
 

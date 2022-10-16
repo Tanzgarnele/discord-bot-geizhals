@@ -74,12 +74,11 @@ namespace ManfredHorst
                 product = GetProducts(document);
                 product.LatestTime = DateTime.Now;
                 product.ProductUrl = alarm.Url;
-                Console.WriteLine($"Checking {alarm.Alias} {alarm.Price}€ Current Price at: {product.Price}€");
+                Console.WriteLine($"Checking {alarm.Alias} {Convert.ToDouble(alarm.Price)}€ Current Price at: {Convert.ToDouble(product.Price)}€");
             }
 
-            if (Convert.ToDouble(product.Price) <= Convert.ToDouble(alarm.Price) && String.IsNullOrWhiteSpace(product.Price))
+            if (Convert.ToDouble(product.Price) <= Convert.ToDouble(alarm.Price) && !String.IsNullOrWhiteSpace(product.Price))
             {
-                //IMessageChannel? chan = client.GetChannel(785318419750191114) as IMessageChannel;
                 IMessageChannel chan = client.GetChannel(570446080697827334) as IMessageChannel;
 
                 if (chan != null)
