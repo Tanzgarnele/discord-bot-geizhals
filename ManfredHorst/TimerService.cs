@@ -119,7 +119,6 @@ namespace ManfredHorst
                     .Replace("ab ", String.Empty)
                     .Replace("€ ", String.Empty)
                     .Trim();
-                Console.WriteLine(product.Price);
             }
             else
             {
