@@ -2,7 +2,7 @@
 {
     public interface ISqlDataAccess
     {
-        String ConnectionStringName { get; set; }
+        String ConnectionString { get; set; }
 
         Task SaveData<T>(String sql, T parameters);
 
@@ -11,5 +11,6 @@
         Task<List<T>> LoadData<T, U>(String sql, U parameters);
 
         Task ExecuteSql(String sql);
+        Boolean IsServerConnected();
     }
 }

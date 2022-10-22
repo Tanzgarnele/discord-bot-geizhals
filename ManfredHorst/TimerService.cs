@@ -19,12 +19,10 @@ namespace ManfredHorst
         {
             this.client = client ?? throw new ArgumentNullException(nameof(client));
             this.config = config ?? throw new ArgumentNullException(nameof(config));
-            
         }
 
         public async Task InitalizeAsync()
         {
-            //Console.WriteLine($"Starting scan {DateTime.Now}");
             try
             {
                 timer = new Timer(async _ =>
@@ -150,7 +148,6 @@ namespace ManfredHorst
                     .Replace("ab ", String.Empty)
                     .Replace("€ ", String.Empty)
                     .Trim();
-                Console.WriteLine(product.Price);
             }
             else
             {
