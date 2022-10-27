@@ -60,8 +60,12 @@ namespace ManfredHorst
 
             CancellationTokenSource cancellationToken = new();
             HttpClient httpClient = new();
+            if (!alarm.Url.Contains("&sort=p"))
+            {
+                alarm.Url += "&sort=p";
+            }
 
-            HttpResponseMessage request = await httpClient.GetAsync($"{alarm.Url}&sort=p");
+            HttpResponseMessage request = await httpClient.GetAsync(alarm.Url);
             cancellationToken.Token.ThrowIfCancellationRequested();
 
             Stream response = await request.Content.ReadAsStreamAsync();
@@ -77,14 +81,14 @@ namespace ManfredHorst
                 product = GetSingleProduct(document);
                 product.LatestTime = DateTime.Now;
                 product.ProductUrl = alarm.Url;
-                Console.WriteLine($"Checking single item {alarm.Alias} {alarm.Price}€ Current Price at: {product.Price}€");
+                Console.WriteLine($"Checking [single item] {alarm.Alias} {alarm.Price}€ Current Price at: {product.Price}€");
             }
             else if (alarm.Url.Contains("geizhals.de") && alarm.Url.Contains("cat="))
             {
                 product = GetProductList(document);
                 product.LatestTime = DateTime.Now;
                 product.ProductUrl = alarm.Url;
-                Console.WriteLine($"Checking filter items {alarm.Alias} {alarm.Price}€ Current Price at: {product.Price}€");
+                Console.WriteLine($"Checking [filter items] {alarm.Alias} {alarm.Price}€ Current Price at: {product.Price}€");
             }
 
             if (Convert.ToDouble(product.Price) <= Convert.ToDouble(alarm.Price) && !String.IsNullOrWhiteSpace(product.Price))
