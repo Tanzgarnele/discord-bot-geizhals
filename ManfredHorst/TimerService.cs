@@ -57,26 +57,26 @@ public class TimerService
             throw new ArgumentNullException(nameof(alarm));
         }
 
-        Console.WriteLine($"Scanning {alarm.UserAlias} {DateTime.Now}");
+        Console.WriteLine($"Scanning {alarm.Alias} {DateTime.Now}");
 
-        if (!alarm.UserUrl.Contains("&sort=p"))
+        if (!alarm.Url.Contains("&sort=p"))
         {
-            alarm.UserUrl += "&sort=p";
+            alarm.Url += "&sort=p";
         }
 
-        IHtmlDocument document = await GetHtmlDocument(alarm.UserUrl);
+        IHtmlDocument document = await GetHtmlDocument(alarm.Url);
 
         alarm = await this.GetProduct(document, alarm);
-        Console.WriteLine($"Checking item: {alarm.UserAlias}\nAlarm   Price: {alarm.UserPrice}€\nCurrent Price: {alarm.ProductPrice}€\n");
-        if (alarm.ProductPrice >= alarm.UserPrice)
+        Console.WriteLine($"Checking item: {alarm.Alias}\nAlarm   Price: {alarm.Price}€\nCurrent Price: {alarm.ProductPrice}€\n");
+        if (alarm.ProductPrice <= alarm.Price)
         {
             if (client.GetChannel(Convert.ToUInt64(this.config["output:debug"])) is IMessageChannel chan)
             {
-                Console.WriteLine($"Alarm {alarm.UserAlias} from {alarm.Mention} deleted {DateTime.Now}");
-                await chan.SendMessageAsync($"**{alarm.UserAlias}** below **{alarm.UserPrice}€**\n{alarm.ProductUrl}\n {alarm.Mention} Alarm deleted!");
+                Console.WriteLine($"Alarm {alarm.Alias} from {alarm.Mention} deleted {DateTime.Now}");
+                await chan.SendMessageAsync($"**{alarm.Alias}** below **{alarm.Price}€**\n{alarm.ProductUrl}\n {alarm.Mention} Alarm deleted!");
             }
 
-            await this.productData.DeleteAlarm(alarm.UserAlias, alarm.Mention);
+            await this.productData.DeleteAlarm(alarm.Alias, alarm.Mention);
         }
     }
 

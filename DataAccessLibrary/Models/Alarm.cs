@@ -2,9 +2,9 @@
 
 public class Alarm
 {
-    public String UserUrl { get; set; }
-    public String UserAlias { get; set; }
-    public Double UserPrice { get; set; }
+    public String Url { get; set; }
+    public String Alias { get; set; }
+    public Double Price { get; set; }
     public String Mention { get; set; }
 
     public String ProductUrl { get; set; }
