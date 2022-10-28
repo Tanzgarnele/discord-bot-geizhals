@@ -6,6 +6,8 @@ using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using System.Globalization;
+using static System.Net.Mime.MediaTypeNames;
+using YamlDotNet.Core.Tokens;
 
 namespace ManfredHorst;
 
@@ -130,12 +132,13 @@ public class TimerService
 
     private Double GetProductPrice(IHtmlDocument document, String selector)
     {
-       var test = Convert.ToDouble(document.QuerySelectorAll(selector)
+        Double.TryParse(document.QuerySelectorAll(selector)
                                 .FirstOrDefault().TextContent
                                 .Replace("ab ", String.Empty)
                                 .Replace("€ ", String.Empty)
-                                .Trim().Replace(".", ","));
-        return test;
+                                .Trim().Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, result: out Double value);
+
+        return value;
     }
 
     private String GetProductName(IHtmlDocument document, String selector)
