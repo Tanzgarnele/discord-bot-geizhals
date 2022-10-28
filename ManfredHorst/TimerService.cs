@@ -60,8 +60,6 @@ public class TimerService
             throw new ArgumentNullException(nameof(alarm));
         }
 
-        Console.WriteLine($"Scanning {alarm.Alias} {DateTime.Now}");
-
         if (!alarm.Url.Contains("&sort=p"))
         {
             alarm.Url += "&sort=p";
@@ -70,7 +68,7 @@ public class TimerService
         IHtmlDocument document = await GetHtmlDocument(alarm.Url);
 
         alarm = await this.GetProduct(document, alarm);
-        Console.WriteLine($"Checking item: {alarm.Alias}\nAlarm   Price: {alarm.Price}€\nCurrent Price: {alarm.ProductPrice}€\n");
+        Console.WriteLine($"Checking item: {alarm.Alias}\nAlarm   Price: {alarm.Price}€\nCurrent Price: {alarm.ProductPrice}€\n\n");
         if (alarm.ProductPrice <= alarm.Price)
         {
             if (client.GetChannel(Convert.ToUInt64(this.config["output:live"])) is IMessageChannel chan)
