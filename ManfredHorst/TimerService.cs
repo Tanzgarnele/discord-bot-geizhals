@@ -5,6 +5,7 @@ using DataAccessLibrary.Sql;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
+using System.Globalization;
 
 namespace ManfredHorst;
 
@@ -133,7 +134,7 @@ public class TimerService
                                 .FirstOrDefault().TextContent
                                 .Replace("ab ", String.Empty)
                                 .Replace("€ ", String.Empty)
-                                .Trim());
+                                .Trim(), CultureInfo.InvariantCulture);
     }
 
     private String GetProductName(IHtmlDocument document, String selector)
