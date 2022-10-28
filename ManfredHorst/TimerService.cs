@@ -130,11 +130,14 @@ public class TimerService
 
     private Double GetProductPrice(IHtmlDocument document, String selector)
     {
+        CultureInfo culture = new("de-DE");
+        culture.NumberFormat.NumberDecimalSeparator = ".";
+
         return Convert.ToDouble(document.QuerySelectorAll(selector)
                                 .FirstOrDefault().TextContent
                                 .Replace("ab ", String.Empty)
                                 .Replace("€ ", String.Empty)
-                                .Trim(), CultureInfo.InvariantCulture);
+                                .Trim(), culture);
     }
 
     private String GetProductName(IHtmlDocument document, String selector)
