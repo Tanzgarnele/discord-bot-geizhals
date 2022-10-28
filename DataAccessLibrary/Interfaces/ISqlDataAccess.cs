@@ -1,16 +1,15 @@
-﻿namespace DataAccessLibrary.Interfaces
+﻿namespace DataAccessLibrary.Interfaces;
+
+public interface ISqlDataAccess
 {
-    public interface ISqlDataAccess
-    {
-        String ConnectionString { get; set; }
+    String ConnectionString { get; set; }
 
-        Task SaveData<T>(String sql, T parameters);
+    Task SaveData<T>(String sql, T parameters);
 
-        Task<Int64> LoadScalarData(String sql);
+    Task<Int64> LoadScalarData(String sql);
 
-        Task<List<T>> LoadData<T, U>(String sql, U parameters);
+    Task<List<T>> LoadData<T, U>(String sql, U parameters);
 
-        Task ExecuteSql(String sql);
-        Boolean IsServerConnected();
-    }
+    Task ExecuteSql(String sql);
+    Boolean IsServerConnected();
 }

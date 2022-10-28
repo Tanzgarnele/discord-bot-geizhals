@@ -1,21 +1,20 @@
 ﻿using DataAccessLibrary.Models;
 
-namespace DataAccessLibrary.Interfaces
+namespace DataAccessLibrary.Interfaces;
+
+public interface IProductData
 {
-    public interface IProductData
-    {
-        Task InsertAlarm(Alarm alarm);
+    Task InsertAlarm(DatabaseAlarm alarm);
 
-        Task InsertUser(User user);
+    Task InsertUser(User user);
 
-        Task InsertDEBUGAlarm();
+    Task InsertDEBUGAlarm();
 
-        Task<Int64> GetUserByMention(String mention);
+    Task<Int64> GetUserByMention(String mention);
 
-        Task<List<Alarm>> GetAlarmsByMention(String mention);
+    Task<List<DatabaseAlarm>> GetAlarmsByMention(String mention);
 
-        Task DeleteAlarm(String alias, String mention);
+    Task DeleteAlarm(String alias, String mention);
 
-        Task<List<UserAlarm>> GetAlarms();
-    }
+    Task<List<Alarm>> GetAlarms();
 }

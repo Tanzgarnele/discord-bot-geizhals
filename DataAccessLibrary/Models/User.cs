@@ -1,9 +1,8 @@
-﻿namespace DataAccessLibrary.Models
+﻿namespace DataAccessLibrary.Models;
+
+public class User
 {
-    public class User
-    {
-        public String Mention { get; set; }
-        public String Username { get; set; }
-        public DateTime EntryDate { get; set; }
-    }
+    public String Mention { get; set; }
+    public String Username { get; set; }
+    public DateTime EntryDate { get; set; }
 }
