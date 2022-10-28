@@ -128,16 +128,14 @@ public class TimerService
         return document.QuerySelectorAll("body").Select(x => x.GetAttribute("data-what")).FirstOrDefault();
     }
 
-    private Double GetProductPrice(IHtmlDocument document, String selector)
+    private Decimal GetProductPrice(IHtmlDocument document, String selector)
     {
-        CultureInfo culture = new("de-DE");
-        culture.NumberFormat.NumberDecimalSeparator = ".";
-
-        return Convert.ToDouble(document.QuerySelectorAll(selector)
+       var test = Convert.ToDouble(document.QuerySelectorAll(selector)
                                 .FirstOrDefault().TextContent
                                 .Replace("ab ", String.Empty)
                                 .Replace("€ ", String.Empty)
-                                .Trim(), culture);
+                                .Trim().Replace(".", ","));
+        return test;
     }
 
     private String GetProductName(IHtmlDocument document, String selector)
