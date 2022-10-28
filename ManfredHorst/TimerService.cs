@@ -128,7 +128,7 @@ public class TimerService
         return document.QuerySelectorAll("body").Select(x => x.GetAttribute("data-what")).FirstOrDefault();
     }
 
-    private Decimal GetProductPrice(IHtmlDocument document, String selector)
+    private Double GetProductPrice(IHtmlDocument document, String selector)
     {
        var test = Convert.ToDouble(document.QuerySelectorAll(selector)
                                 .FirstOrDefault().TextContent
