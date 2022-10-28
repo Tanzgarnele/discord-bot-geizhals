@@ -70,7 +70,7 @@ public class TimerService
         Console.WriteLine($"Checking item: {alarm.Alias}\nAlarm   Price: {alarm.Price}€\nCurrent Price: {alarm.ProductPrice}€\n");
         if (alarm.ProductPrice <= alarm.Price)
         {
-            if (client.GetChannel(Convert.ToUInt64(this.config["output:debug"])) is IMessageChannel chan)
+            if (client.GetChannel(Convert.ToUInt64(this.config["output:live"])) is IMessageChannel chan)
             {
                 Console.WriteLine($"Alarm {alarm.Alias} from {alarm.Mention} deleted {DateTime.Now}");
                 await chan.SendMessageAsync($"**{alarm.Alias}** below **{alarm.Price}€**\n{alarm.ProductUrl}\n {alarm.Mention} Alarm deleted!");
