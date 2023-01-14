@@ -1,4 +1,5 @@
 ﻿using DataAccessLibrary.Interfaces;
+using DataAccessLibrary.Scraper;
 using DataAccessLibrary.Sql;
 using Discord;
 using Discord.Interactions;
@@ -6,72 +7,75 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace ManfredHorst;
 
 public class Program
 {
     private readonly IConfiguration config;
-    private readonly IServiceProvider services;
-    private readonly ISqlDataAccess sqlDataAccess;
+    private readonly DiscordSocketClient client;
 
-    private readonly DiscordSocketConfig socketConfig = new()
+    public Program(DiscordSocketClient client, IConfiguration config)
     {
-        GatewayIntents = GatewayIntents.AllUnprivileged,
-        AlwaysDownloadUsers = true,
-        LogLevel = LogSeverity.Info,
-        MessageCacheSize = 50,
-    };
+        this.client = client ?? throw new ArgumentNullException(nameof(client));
+        this.config = config ?? throw new ArgumentNullException(nameof(config));
+    }
 
-    public Program()
+    public static IHostBuilder CreateHostBuilder(string[] args)
     {
-        this.config = new ConfigurationBuilder().SetBasePath(AppContext.BaseDirectory)
-            .AddYamlFile("config.yml")
-            .Build();
+        return Host.CreateDefaultBuilder(args)
+            .ConfigureServices((hostContext, services) =>
+            {
+                IConfigurationRoot config = new ConfigurationBuilder().SetBasePath(AppContext.BaseDirectory)
+                    .AddYamlFile("config.yml")
+                    .Build();
 
-        this.services = new ServiceCollection()
-            .AddSingleton(this.config)
-            .AddSingleton(this.socketConfig)
-            .AddSingleton<DiscordSocketClient>()
-            .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
-            .AddSingleton(x => new TimerService(x.GetRequiredService<DiscordSocketClient>(), this.config))
-            .AddSingleton<InteractionHandler>()
-            .AddSingleton<ISqlDataAccess, SqlDataAccess>()
-            .AddSingleton<IProductData, ProductData>()
-            .BuildServiceProvider();
+                services.AddSingleton<IConfiguration>(config);
 
-        this.sqlDataAccess = new SqlDataAccess(this.config);
+                services.AddSingleton(new DiscordSocketConfig
+                {
+                    GatewayIntents = GatewayIntents.AllUnprivileged,
+                    AlwaysDownloadUsers = true,
+                    LogLevel = LogSeverity.Info,
+                    MessageCacheSize = 50,
+                });
+
+                services.AddHostedService<TimerService>();
+                services.AddSingleton<TimerService>();
+                services.AddSingleton<Program>();
+                services.AddSingleton<DiscordSocketClient>();
+                services.AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()));
+                services.AddSingleton<InteractionHandler>();
+                services.AddSingleton<ISqlDataAccess, SqlDataAccess>();
+                services.AddSingleton<IProductData, ProductData>();
+                services.AddSingleton<IGeizhalsScraper, GeizhalsScraper>();
+
+            });
     }
 
     private static void Main(string[] args)
-        => new Program().RunAsync()
-            .GetAwaiter()
-            .GetResult();
+    {
+        using IHost host = CreateHostBuilder(args).Build();
+        host.Start();
+        host.Services.GetRequiredService<InteractionHandler>().InitalizeAsync().GetAwaiter().GetResult();
+        host.Services.GetRequiredService<Program>().RunAsync().GetAwaiter().GetResult();
+    }
+
 
     public async Task RunAsync()
     {
-        DiscordSocketClient client = this.services.GetRequiredService<DiscordSocketClient>();
-
         client.Log += LogAsync;
+        Console.WriteLine($"{DateTime.Now} SQL Server is online! Starting the Bot now.");
 
-        await this.services.GetRequiredService<InteractionHandler>().InitalizeAsync();
-        await this.services.GetRequiredService<TimerService>().InitalizeAsync();
+        await client.LoginAsync(TokenType.Bot, this.config["tokens:discord"]);
+        await client.StartAsync();
 
-        if (this.sqlDataAccess.IsServerConnected())
-        {
-            Console.WriteLine($"{DateTime.Now} SQL Server is online! Starting the Bot now.");
-
-            await client.LoginAsync(TokenType.Bot, this.config["tokens:discord"]);
-            await client.StartAsync();
-
-            await Task.Delay(Timeout.Infinite);
-        }
-        else
-        {
-            Console.WriteLine($"{DateTime.Now} SQL Server not online!");
-        }
+        await Task.Delay(Timeout.Infinite);
     }
 
     private async Task LogAsync(LogMessage message)
-        => Console.WriteLine(message.ToString());
+    {
+        Console.WriteLine(message.ToString());
+    }
 }

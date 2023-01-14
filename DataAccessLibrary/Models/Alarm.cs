@@ -1,4 +1,6 @@
-﻿namespace DataAccessLibrary.Models;
+﻿using System.ComponentModel;
+
+namespace DataAccessLibrary.Models;
 
 public class Alarm
 {
@@ -9,5 +11,7 @@ public class Alarm
 
     public String ProductUrl { get; set; }
     public String ProductName { get; set; }
+
+    [DefaultValue(Double.MaxValue)]
     public Double ProductPrice { get; set; }
 }

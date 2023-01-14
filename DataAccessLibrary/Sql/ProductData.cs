@@ -10,7 +10,7 @@ public class ProductData : IProductData
 
 	public ProductData(ISqlDataAccess db)
 	{
-		this.Db = db;
+		this.Db = db ?? throw new ArgumentNullException(nameof(db));
 	}
 
 	public Task<Int64> GetUserByMention(String mention)

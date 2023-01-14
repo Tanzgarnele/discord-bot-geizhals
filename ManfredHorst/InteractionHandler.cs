@@ -13,13 +13,14 @@ public class InteractionHandler
 
     public InteractionHandler(DiscordSocketClient client, InteractionService commands, IServiceProvider services)
     {
-        this.client = client;
-        this.commands = commands;
-        this.services = services;
+        this.client = client ?? throw new ArgumentNullException(nameof(client));
+        this.commands = commands ?? throw new ArgumentNullException(nameof(commands));
+        this.services = services ?? throw new ArgumentNullException(nameof(services));
     }
 
     public async Task InitalizeAsync()
     {
+        Console.WriteLine("InteractionHandler Initialization");
         this.client.Ready += ReadyAsync;
         this.commands.Log += LogAsync;
 
