@@ -3,7 +3,7 @@ using Discord.Addons.Hosting.Util;
 using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 
-namespace ManfredHorst
+namespace ManfredHorst.Services
 {
     public class BotStatusService : DiscordClientService
     {

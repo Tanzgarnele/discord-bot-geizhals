@@ -11,5 +11,6 @@ public interface ISqlDataAccess
     Task<List<T>> LoadData<T, U>(String sql, U parameters);
 
     Task ExecuteSql(String sql);
+
     Boolean IsServerConnected();
 }

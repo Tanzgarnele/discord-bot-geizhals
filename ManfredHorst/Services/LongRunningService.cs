@@ -6,8 +6,9 @@ using Discord.Addons.Hosting.Util;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 
-namespace ManfredHorst;
+namespace ManfredHorst.Services;
 
 public class LongRunningService : DiscordClientService
 {
@@ -26,11 +27,12 @@ public class LongRunningService : DiscordClientService
     {
         await Client.WaitForReadyAsync(stoppingToken);
 
-        new Timer(DoWork, !stoppingToken.IsCancellationRequested, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(20));
+        new Timer(DoWork, !stoppingToken.IsCancellationRequested, TimeSpan.Zero, TimeSpan.FromMinutes(20));
     }
 
     private async void DoWork(object state)
     {
+        Logger.LogInformation("Scan starting!");
         foreach (Alarm alarm in await productData.GetAlarms())
         {
             if (await this.geizhalsScraper.ScrapeGeizhals(alarm))
@@ -45,5 +47,7 @@ public class LongRunningService : DiscordClientService
 
             await Task.Delay(TimeSpan.FromSeconds(5));
         }
+        Logger.LogInformation("Scan done!");
+
     }
 }

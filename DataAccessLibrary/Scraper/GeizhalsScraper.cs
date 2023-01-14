@@ -2,12 +2,20 @@
 using AngleSharp.Html.Parser;
 using DataAccessLibrary.Models;
 using ManfredHorst;
+using Microsoft.Extensions.Logging;
 using System.Globalization;
 
 namespace DataAccessLibrary.Scraper
 {
     public class GeizhalsScraper : IGeizhalsScraper
     {
+        private readonly ILogger<GeizhalsScraper> logger;
+
+        public GeizhalsScraper(ILogger<GeizhalsScraper> logger)
+        {
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
         public async Task<Boolean> ScrapeGeizhals(Alarm alarm)
         {
             if (alarm is null)
@@ -24,7 +32,7 @@ namespace DataAccessLibrary.Scraper
 
             alarm = GetProduct(document, alarm);
 
-            Console.WriteLine($"Checking item: {alarm.Alias}\nAlarm   Price: {alarm.Price}€\nCurrent Price: {alarm.ProductPrice}€\n");
+            this.logger.LogInformation("Checking item: {Alias}\nAlarm   Price: {Price}€\nCurrent Price: {ProductPrice}€\n", alarm.Alias, alarm.Price, alarm.ProductPrice);
             if (alarm.ProductPrice > 0 && alarm.ProductPrice <= alarm.Price)
             {
                 return true;
@@ -45,7 +53,7 @@ namespace DataAccessLibrary.Scraper
             return document;
         }
 
-        private static Alarm GetProduct(IHtmlDocument document, Alarm alarm)
+        private Alarm GetProduct(IHtmlDocument document, Alarm alarm)
         {
             if (document is null)
             {
@@ -67,7 +75,7 @@ namespace DataAccessLibrary.Scraper
             }
             else
             {
-                Console.WriteLine($"Error: {document.StatusCode}");
+                this.logger.LogError("Error: {StatusCode}", document.StatusCode);
             }
             return alarm;
         }
