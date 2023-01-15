@@ -33,7 +33,7 @@ public class LongRunningService : DiscordClientService
 
     private async void DoWork(object state)
     {
-        Logger.LogInformation("Scan starting! {dateTime}", DateTime.Now);
+        Logger.LogInformation("Scan starting! {dateTime}\n", DateTime.Now);
         foreach (Alarm alarm in await productData.GetAlarms())
         {
             if (await this.geizhalsScraper.ScrapeGeizhals(alarm))
@@ -48,6 +48,6 @@ public class LongRunningService : DiscordClientService
 
             await Task.Delay(TimeSpan.FromSeconds(5));
         }
-        Logger.LogInformation("Scan done! {dateTime}", DateTime.Now);
+        Logger.LogInformation("Scan done! {dateTime}\n", DateTime.Now);
     }
 }

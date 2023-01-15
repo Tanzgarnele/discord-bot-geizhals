@@ -16,9 +16,9 @@ internal class Program
 {
     private static async Task Main(String[] args)
     {
-        IConfigurationRoot config = new ConfigurationBuilder().SetBasePath(AppContext.BaseDirectory)
-            .AddYamlFile("config.yml")
-            .Build();
+        IConfigurationRoot config = new ConfigurationBuilder().SetBasePath(args[0])
+        .AddYamlFile("config.yml")
+        .Build();
 
         IHost host = Host.CreateDefaultBuilder(args)
             .ConfigureDiscordHost((context, discordConfig) =>
@@ -52,7 +52,6 @@ internal class Program
                 services.AddSingleton<ISqlDataAccess, SqlDataAccess>();
                 services.AddSingleton<IProductData, ProductData>();
                 services.AddSingleton<IGeizhalsScraper, GeizhalsScraper>();
-
             }).Build();
 
         await host.RunAsync();

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ManfredHorst": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\VS Workspace\\discord-bot-csharp\\ManfredHorst\""
+    }
+  }
+}
