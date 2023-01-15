@@ -23,7 +23,7 @@ namespace DataAccessLibrary.Scraper
                 throw new ArgumentNullException(nameof(alarm));
             }
 
-            if (!alarm.Url.Contains("&sort=p"))
+            if (!alarm.Url.Contains("&sort=p") && !alarm.Url.EndsWith(".html"))
             {
                 alarm.Url += "&sort=p";
             }

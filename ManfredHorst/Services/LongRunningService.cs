@@ -6,7 +6,6 @@ using Discord.Addons.Hosting.Util;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System.Security.Claims;
 
 namespace ManfredHorst.Services;
 
@@ -15,6 +14,7 @@ public class LongRunningService : DiscordClientService
     private readonly IConfiguration config;
     private readonly IProductData productData;
     private readonly IGeizhalsScraper geizhalsScraper;
+    private Timer timer;
 
     public LongRunningService(DiscordSocketClient client, ILogger<DiscordClientService> logger, IConfiguration config, IProductData productData, IGeizhalsScraper geizhalsScraper) : base(client, logger)
     {
@@ -27,19 +27,20 @@ public class LongRunningService : DiscordClientService
     {
         await Client.WaitForReadyAsync(stoppingToken);
 
-        new Timer(DoWork, !stoppingToken.IsCancellationRequested, TimeSpan.Zero, TimeSpan.FromMinutes(20));
+        timer = new Timer(DoWork, !stoppingToken.IsCancellationRequested, TimeSpan.Zero, TimeSpan.FromMinutes(20));
+        stoppingToken.Register(() => { timer.Dispose(); });
     }
 
     private async void DoWork(object state)
     {
-        Logger.LogInformation("Scan starting!");
+        Logger.LogInformation("Scan starting! {dateTime}", DateTime.Now);
         foreach (Alarm alarm in await productData.GetAlarms())
         {
             if (await this.geizhalsScraper.ScrapeGeizhals(alarm))
             {
                 if (Client.GetChannel(Convert.ToUInt64(this.config["output:live"])) is IMessageChannel chan)
                 {
-                    Logger.LogInformation($"Alarm {alarm.Alias} from {alarm.Mention} deleted {DateTime.Now}");
+                    Logger.LogInformation("Alarm {Alias} from {Mention} deleted {DateTime}", alarm.Alias, alarm.Mention, DateTime.Now);
                     await chan.SendMessageAsync($"**{alarm.Alias}** below **{alarm.Price}€**\n{alarm.Url}\n {alarm.Mention} Alarm deleted!");
                     await this.productData.DeleteAlarm(alarm.Alias, alarm.Mention);
                 }
@@ -47,7 +48,6 @@ public class LongRunningService : DiscordClientService
 
             await Task.Delay(TimeSpan.FromSeconds(5));
         }
-        Logger.LogInformation("Scan done!");
-
+        Logger.LogInformation("Scan done! {dateTime}", DateTime.Now);
     }
 }
