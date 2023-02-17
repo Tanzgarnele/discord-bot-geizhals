@@ -31,13 +31,23 @@ public class SqlDataAccess : ISqlDataAccess
         }
     }
 
-    public async Task<List<T>> LoadData<T, U>(String sql, U parameters)
+    public async Task<List<T>> LoadDataList<T, U>(String sql, U parameters)
     {
         using (IDbConnection connection = new SqlConnection(this.ConnectionString))
         {
             IEnumerable<T> data = await connection.QueryAsync<T>(sql, parameters);
 
             return data.ToList();
+        }
+    }
+
+    public async Task<T> LoadData<T, U>(String sql, U parameters)
+    {
+        using (IDbConnection connection = new SqlConnection(this.ConnectionString))
+        {
+            T data = await connection.QuerySingleOrDefaultAsync<T>(sql, parameters);
+
+            return data;
         }
     }
 

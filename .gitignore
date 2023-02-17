@@ -362,3 +362,10 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Ignore Dockerfiles
+**/Dockerfile
+**/Dockerfile.*
+
+# Ignore GitLab CI file
+.gitlab-ci.yml

@@ -8,7 +8,9 @@ public interface ISqlDataAccess
 
     Task<Int64> LoadScalarData(String sql);
 
-    Task<List<T>> LoadData<T, U>(String sql, U parameters);
+    Task<List<T>> LoadDataList<T, U>(String sql, U parameters);
+
+    Task<T> LoadData<T, U>(String sql, U parameters);
 
     Task ExecuteSql(String sql);
 
