@@ -1,5 +1,6 @@
 ﻿using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
+using DataAccessLibrary.Interfaces;
 using DataAccessLibrary.Models;
 using ManfredHorst;
 using Microsoft.Extensions.Logging;
@@ -10,10 +11,12 @@ namespace DataAccessLibrary.Scraper
     public class GeizhalsScraper : IGeizhalsScraper
     {
         private readonly ILogger<GeizhalsScraper> logger;
+        private readonly IProductData productData;
 
-        public GeizhalsScraper(ILogger<GeizhalsScraper> logger)
+        public GeizhalsScraper(ILogger<GeizhalsScraper> logger, IProductData productData)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.productData = productData ?? throw new ArgumentNullException(nameof(productData));
         }
 
         public async Task<Boolean> ScrapeGeizhals(Alarm alarm)
@@ -60,18 +63,33 @@ namespace DataAccessLibrary.Scraper
                 throw new ArgumentNullException(nameof(document));
             }
 
+            if (alarm is null)
+            {
+                throw new ArgumentNullException(nameof(alarm));
+            }
+
+            if (alarm.CurrentPrice > 0)
+            {
+                this.productData.UpdateLastPrice(alarm.Alias, alarm.Mention, alarm.CurrentPrice);
+            }
+
             if (document.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 if (GetProductMethod(document).Equals("a"))
                 {
                     alarm.ProductName = GetProductName(document, "h1.variant__header__headline");
                     alarm.ProductPrice = GetProductPrice(document, "#offer__price-0 .gh_price");
+                    alarm.ThumbnailUrl = GetProductThumbnail(document, "img.swiper-slide__image", "src"); 
                 }
                 else if (GetProductMethod(document).Equals("cat"))
                 {
                     alarm.ProductName = GetProductName(document, "#product0 div.productlist__item .notrans");
                     alarm.ProductPrice = GetProductPrice(document, "#product0 div.productlist__price .gh_price");
+                    alarm.ThumbnailUrl = GetProductThumbnail(document, "div.catitem__image__container img", "big-image-url");
                 }
+
+                this.productData.UpdateCurrentPrice(alarm.Alias, alarm.Mention, alarm.ProductPrice);
+                this.productData.UpdateThumbnailUrl(alarm.Alias, alarm.Mention, alarm.ThumbnailUrl);
             }
             else
             {
@@ -118,6 +136,12 @@ namespace DataAccessLibrary.Scraper
             return $@"https://geizhals.de{document.QuerySelectorAll(selector)
                                     .Select(x => x.GetAttribute("href"))
                                     .FirstOrDefault()}";
+        }
+
+        private static String GetProductThumbnail(IHtmlDocument document, String selector, String attribute)
+        {
+            return document.QuerySelectorAll(selector)
+                .Select(x => x.GetAttribute(attribute)).FirstOrDefault();
         }
     }
 }

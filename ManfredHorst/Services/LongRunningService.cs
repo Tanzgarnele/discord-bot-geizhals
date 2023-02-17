@@ -6,6 +6,10 @@ using Discord.Addons.Hosting.Util;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Reflection.Metadata;
+using System.Security.Claims;
+using static System.Net.WebRequestMethods;
 
 namespace ManfredHorst.Services;
 
@@ -40,9 +44,21 @@ public class LongRunningService : DiscordClientService
             {
                 if (Client.GetChannel(Convert.ToUInt64(this.config["output:live"])) is IMessageChannel chan)
                 {
-                    Logger.LogInformation("Alarm {Alias} from {Mention} deleted {DateTime}", alarm.Alias, alarm.Mention, DateTime.Now);
-                    await chan.SendMessageAsync($"**{alarm.Alias}** below **{alarm.Price}€**\n{alarm.Url}\n {alarm.Mention} Alarm deleted!");
-                    await this.productData.DeleteAlarm(alarm.Alias, alarm.Mention);
+                    Alarm currentAlarm = await productData.GetAlarmByAlias(alarm.Alias);
+                    Logger.LogInformation("Alarm {Alias} from {Mention} deleted {DateTime}", currentAlarm.Alias, currentAlarm.Mention, DateTime.Now);
+
+                    String lastPrice = currentAlarm.LastPrice <= 0 ? "no scan" : currentAlarm.LastPrice.ToString();
+
+                    await chan.SendMessageAsync($"{currentAlarm.Mention} {currentAlarm.Alias} is **{currentAlarm.Price - currentAlarm.CurrentPrice}€** below your alarm price!", embed: new EmbedBuilder()
+                                .AddField("Product", $"[{currentAlarm.Alias}]({currentAlarm.Url})", true)
+                                .AddField("Current Price", $"{currentAlarm.CurrentPrice}", true)
+                                .AddField("Last Scan", $"{lastPrice}", true)
+                                .WithImageUrl("https://i.imgur.com/uOamU2g.gif")
+                                .WithThumbnailUrl($"{currentAlarm.ThumbnailUrl}")
+                                .WithCurrentTimestamp()
+                                .Build());
+
+                    await this.productData.DeleteAlarm(currentAlarm.Alias, currentAlarm.Mention);
                 }
             }
 
