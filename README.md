@@ -13,7 +13,7 @@ This Discord bot allows users to track product prices from Geizhals.de and manag
 
 ### LongRunningService
 
-`LongRunningService` is responsible for periodically scanning the prices of products from Geizhals.de. When the price of a product drops below the user's alarm threshold, a notification is sent to the user. The service also manages alarms, allowing users to add, delete, and update them.
+`LongRunningService` is responsible for periodically scanning the prices of products from Geizhals.de. When the price of a product drops below the user's alarm threshold, a notification is sent to the user.
 
 ### InteractionModule
 
