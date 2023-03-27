@@ -23,3 +23,7 @@ This Discord bot allows users to track product prices from Geizhals.de and manag
 - `/pricealarm`: Show current alarms and allow the user to add or delete alarms
 - Add Alarm: Add a new alarm with a product URL, alias, and price threshold
 - Delete Alarm: Delete an existing alarm by its alias
+
+## License
+
+This project is licensed under the terms of the MIT license. See the LICENSE.md file for details.
