@@ -24,6 +24,14 @@ This Discord bot allows users to track product prices from Geizhals.de and manag
 - Add Alarm: Add a new alarm with a product URL, alias, and price threshold
 - Delete Alarm: Delete an existing alarm by its alias
 
+### InteractionHandler
+
+`InteractionHandler` is a service that handles Discord interactions and commands within the Discord bot. It uses the `Discord.Addons.Hosting` and `Discord.Interactions` libraries to provide this functionality. The `InteractionHandler` class listens for interactions from users and executes the appropriate command based on the user's input. It also handles errors that may occur during the execution of a command, logging them and deleting the user's original response if necessary.
+
+### GeizhalsScraper
+
+`GeizhalsScraper` is a class that handles scraping product data from Geizhals.de. It uses the `AngleSharp.Html.Dom` and `AngleSharp.Html.Parser` libraries to parse the HTML data and extract relevant information such as product name, price, and thumbnail URL.
+
 ## License
 
 This project is licensed under the terms of the MIT license. See the LICENSE.md file for details.
