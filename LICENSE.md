@@ -1,6 +1,6 @@
 # MIT License
 
-Copyright (c) Tanzgarnele
+Copyright (c) 2023 Tanzgarnele
 
 ## Permission is hereby granted
 
